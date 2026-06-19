@@ -1,7 +1,7 @@
 "use client";
 
 import { LiveKitRoom, VideoConference, RoomAudioRenderer } from "@livekit/components-react";
-import "@livekit/components-styles/dist/index.css";
+import "@livekit/components-styles";
 
 interface VideoRoomProps {
   token: string;
