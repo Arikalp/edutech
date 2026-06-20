@@ -368,6 +368,9 @@ export default function ClassroomPage() {
         <VideoRoom
           token={token || ""}
           url={livekitUrl || ""}
+          roomId={roomId}
+          role={role}
+          userName={user?.displayName || "Educator"}
           onLeave={() => router.push("/dashboard")}
         />
       </div>
