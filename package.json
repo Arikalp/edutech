@@ -10,7 +10,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@google/genai": "^2.9.0",
     "@livekit/components-react": "^2.9.21",
     "@livekit/components-styles": "^1.2.0",
     "clsx": "^2.1.1",

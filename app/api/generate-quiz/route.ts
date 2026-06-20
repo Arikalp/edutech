@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
-import { GoogleGenAI } from '@google/genai';
 import { getRoomTranscripts, saveGeneratedQuiz } from "../../../lib/firestore";
 
 export async function POST(request: Request) {
@@ -20,7 +19,6 @@ export async function POST(request: Request) {
       : "The lecture covered the basics of Algebra including polynomials, vertex calculations, and factoring quadratic equations.";
 
     const groqApiKey = process.env.GROQ_API_KEY;
-    const geminiApiKey = process.env.GEMINI_API_KEY;
     
     let quizQuestions = [];
     let aiResponse = "";
@@ -50,53 +48,38 @@ export async function POST(request: Request) {
 
       aiResponse = completion.choices[0]?.message?.content || "[]";
     } catch (groqError: any) {
-      console.warn("Groq failed or key missing, falling back to Gemini:", groqError.message);
-      
-      try {
-        if (!geminiApiKey) throw new Error("GEMINI_API_KEY missing");
-        const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.1-flash-lite',
-          contents: `${promptSystem}\n\n${promptUser}`,
-          config: {
-            temperature: 0.2,
-          }
-        });
-        aiResponse = response.text || "[]";
-      } catch (geminiError: any) {
-        console.warn("Gemini failed or key missing, generating a demo quiz:", geminiError.message);
-        usedMock = true;
-        const allMockQuestions = [
-          {
-            question: "Based on the AI Demo transcript, what is the core topic?",
-            options: ["Polynomials", "Chemistry", "World History", "Physical Education"],
-            correctAnswer: "Polynomials"
-          },
-          {
-            question: "How do you factor x^2 - 9?",
-            options: ["(x-3)(x+3)", "(x-9)(x+1)", "(x-3)^2", "It cannot be factored"],
-            correctAnswer: "(x-3)(x+3)"
-          },
-          {
-            question: "This is an auto-generated AI Demo question. Which answer is correct?",
-            options: ["This one", "Not this one", "Nope", "Wrong"],
-            correctAnswer: "This one"
-          },
-          {
-            question: "What is the result of expanding (x + 2)^2?",
-            options: ["x^2 + 4x + 4", "x^2 + 4", "x^2 + 2x + 4", "x^2 + 2"],
-            correctAnswer: "x^2 + 4x + 4"
-          },
-          {
-            question: "In algebra, what is a variable?",
-            options: ["A symbol representing an unknown value", "A constant number", "An equation sign", "A type of fraction"],
-            correctAnswer: "A symbol representing an unknown value"
-          }
-        ];
-        quizQuestions = [];
-        for (let i = 0; i < count; i++) {
-          quizQuestions.push(allMockQuestions[i % allMockQuestions.length]);
+      console.warn("Groq failed or key missing, generating a demo quiz:", groqError.message);
+      usedMock = true;
+      const allMockQuestions = [
+        {
+          question: "Based on the AI Demo transcript, what is the core topic?",
+          options: ["Polynomials", "Chemistry", "World History", "Physical Education"],
+          correctAnswer: "Polynomials"
+        },
+        {
+          question: "How do you factor x^2 - 9?",
+          options: ["(x-3)(x+3)", "(x-9)(x+1)", "(x-3)^2", "It cannot be factored"],
+          correctAnswer: "(x-3)(x+3)"
+        },
+        {
+          question: "This is an auto-generated AI Demo question. Which answer is correct?",
+          options: ["This one", "Not this one", "Nope", "Wrong"],
+          correctAnswer: "This one"
+        },
+        {
+          question: "What is the result of expanding (x + 2)^2?",
+          options: ["x^2 + 4x + 4", "x^2 + 4", "x^2 + 2x + 4", "x^2 + 2"],
+          correctAnswer: "x^2 + 4x + 4"
+        },
+        {
+          question: "In algebra, what is a variable?",
+          options: ["A symbol representing an unknown value", "A constant number", "An equation sign", "A type of fraction"],
+          correctAnswer: "A symbol representing an unknown value"
         }
+      ];
+      quizQuestions = [];
+      for (let i = 0; i < count; i++) {
+        quizQuestions.push(allMockQuestions[i % allMockQuestions.length]);
       }
     }
 

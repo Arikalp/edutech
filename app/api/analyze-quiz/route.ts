@@ -10,14 +10,13 @@ export async function POST(req: Request) {
     }
 
     const groqApiKey = process.env.GROQ_API_KEY;
-    const geminiApiKey = process.env.GEMINI_API_KEY;
 
-    if (!groqApiKey && !geminiApiKey) {
+    if (!groqApiKey) {
       // Fallback for Demo Mode without an API key
       const encoder = new TextEncoder();
       const customReadable = new ReadableStream({
         async start(controller) {
-          const fallbackMessage = "⚠️ **No AI API Keys configured.**\n\nTo see real AI analysis, please add your Groq or Gemini API Key to your `.env` file.\n\nHere is a mock analysis for demo purposes:\n\nYou did a great job overall, but it seems you struggled with factoring polynomials and expanding binomials. I recommend reviewing the FOIL method and practicing difference of squares. Keep up the great work!";
+          const fallbackMessage = "⚠️ **No AI API Keys configured.**\n\nTo see real AI analysis, please add your Groq API Key to your `.env` file.\n\nHere is a mock analysis for demo purposes:\n\nYou did a great job overall, but it seems you struggled with factoring polynomials and expanding binomials. I recommend reviewing the FOIL method and practicing difference of squares. Keep up the great work!";
           
           const words = fallbackMessage.split(" ");
           for (const word of words) {
@@ -55,53 +54,21 @@ Format your response using clean Markdown with bullet points or short paragraphs
 
     const encoder = new TextEncoder();
 
-    if (groqApiKey) {
-      try {
-        const groq = new Groq({ apiKey: groqApiKey });
-        const chatCompletion = await groq.chat.completions.create({
-          messages: [{ role: "user", content: prompt }],
-          model: "llama-3.1-70b-versatile", // Powerful model for tutoring
-          stream: true,
-        });
-
-        const stream = new ReadableStream({
-          async start(controller) {
-            try {
-              for await (const chunk of chatCompletion) {
-                const content = chunk.choices[0]?.delta?.content || "";
-                if (content) {
-                  controller.enqueue(encoder.encode(content));
-                }
-              }
-              controller.close();
-            } catch (error) {
-              controller.error(error);
-            }
-          }
-        });
-
-        return new Response(stream, {
-          headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive" },
-        });
-      } catch (err) {
-        console.warn("Groq streaming failed, falling back to Gemini...");
-      }
-    }
-
-    if (geminiApiKey) {
-      const { GoogleGenAI } = await import('@google/genai');
-      const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-      const responseStream = await ai.models.generateContentStream({
-        model: 'gemini-3.1-flash-lite',
-        contents: prompt
+    try {
+      const groq = new Groq({ apiKey: groqApiKey });
+      const chatCompletion = await groq.chat.completions.create({
+        messages: [{ role: "user", content: prompt }],
+        model: "llama-3.1-70b-versatile", // Powerful model for tutoring
+        stream: true,
       });
 
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            for await (const chunk of responseStream) {
-              if (chunk.text) {
-                controller.enqueue(encoder.encode(chunk.text));
+            for await (const chunk of chatCompletion) {
+              const content = chunk.choices[0]?.delta?.content || "";
+              if (content) {
+                controller.enqueue(encoder.encode(content));
               }
             }
             controller.close();
@@ -114,9 +81,10 @@ Format your response using clean Markdown with bullet points or short paragraphs
       return new Response(stream, {
         headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive" },
       });
+    } catch (err: any) {
+      console.error("Groq streaming failed:", err);
+      throw new Error("Groq API failed: " + err.message);
     }
-
-    throw new Error("Both AI providers failed.");
 
   } catch (error: any) {
     console.error("AI API Error:", error);
