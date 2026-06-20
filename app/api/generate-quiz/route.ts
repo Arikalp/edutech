@@ -5,7 +5,7 @@ import { getRoomTranscripts, saveGeneratedQuiz } from "../../../lib/firestore";
 
 export async function POST(request: Request) {
   try {
-    const { roomId } = await request.json();
+    const { roomId, topic, numQuestions } = await request.json();
 
     if (!roomId) {
       return NextResponse.json({ error: "roomId is required" }, { status: 400 });
@@ -26,8 +26,14 @@ export async function POST(request: Request) {
     let aiResponse = "";
     let usedMock = false;
 
-    const promptSystem = "You are an expert educator. You will be given a transcript of a live class lecture. Generate a 3-question multiple choice quiz based strictly on the content of the transcript. Your response MUST be valid JSON containing an array of objects. Each object must have: 'question' (string), 'options' (array of exactly 4 strings), and 'correctAnswer' (string, must exactly match one of the options). Do not include any markdown formatting, only output the JSON array.";
-    const promptUser = `Here is the transcript:\n\n${combinedTranscript}`;
+    const count = typeof numQuestions === "number" ? Math.max(1, Math.min(20, numQuestions)) : 3;
+
+    const promptSystem = topic 
+      ? `You are an expert educator. Generate a ${count}-question multiple choice quiz based strictly on the topic provided. Your response MUST be valid JSON containing an array of objects. Each object must have: 'question' (string), 'options' (array of exactly 4 strings), and 'correctAnswer' (string, must exactly match one of the options). Do not include any markdown formatting, only output the JSON array.`
+      : `You are an expert educator. You will be given a transcript of a live class lecture. Generate a ${count}-question multiple choice quiz based strictly on the content of the transcript. Your response MUST be valid JSON containing an array of objects. Each object must have: 'question' (string), 'options' (array of exactly 4 strings), and 'correctAnswer' (string, must exactly match one of the options). Do not include any markdown formatting, only output the JSON array.`;
+    const promptUser = topic
+      ? `Generate a quiz on the topic: "${topic}".`
+      : `Here is the transcript:\n\n${combinedTranscript}`;
 
     try {
       if (!groqApiKey) throw new Error("GROQ_API_KEY missing");
@@ -60,7 +66,7 @@ export async function POST(request: Request) {
       } catch (geminiError: any) {
         console.warn("Gemini failed or key missing, generating a demo quiz:", geminiError.message);
         usedMock = true;
-        quizQuestions = [
+        const allMockQuestions = [
           {
             question: "Based on the AI Demo transcript, what is the core topic?",
             options: ["Polynomials", "Chemistry", "World History", "Physical Education"],
@@ -75,8 +81,22 @@ export async function POST(request: Request) {
             question: "This is an auto-generated AI Demo question. Which answer is correct?",
             options: ["This one", "Not this one", "Nope", "Wrong"],
             correctAnswer: "This one"
+          },
+          {
+            question: "What is the result of expanding (x + 2)^2?",
+            options: ["x^2 + 4x + 4", "x^2 + 4", "x^2 + 2x + 4", "x^2 + 2"],
+            correctAnswer: "x^2 + 4x + 4"
+          },
+          {
+            question: "In algebra, what is a variable?",
+            options: ["A symbol representing an unknown value", "A constant number", "An equation sign", "A type of fraction"],
+            correctAnswer: "A symbol representing an unknown value"
           }
         ];
+        quizQuestions = [];
+        for (let i = 0; i < count; i++) {
+          quizQuestions.push(allMockQuestions[i % allMockQuestions.length]);
+        }
       }
     }
 
@@ -91,7 +111,7 @@ export async function POST(request: Request) {
     }
 
     // 4. Save to Firestore
-    const quizTitle = "Auto-Generated Lecture Quiz";
+    const quizTitle = topic ? `AI Quiz - ${topic}` : "Auto-Generated Lecture Quiz";
     await saveGeneratedQuiz(roomId, quizTitle, quizQuestions);
 
     return NextResponse.json({ success: true, message: "Quiz generated successfully", count: quizQuestions.length });

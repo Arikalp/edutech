@@ -32,6 +32,9 @@ export default function TeacherDashboard() {
   const [studentAnalytics, setStudentAnalytics] = useState<any[]>([]);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const [newRoomName, setNewRoomName] = useState("");
+  
+  // Quiz Creation States
+  const [selectedClassroomForQuiz, setSelectedClassroomForQuiz] = useState<Classroom | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.push("/");
@@ -46,6 +49,12 @@ export default function TeacherDashboard() {
       }).catch(console.error);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (classrooms.length > 0 && !selectedClassroomForQuiz) {
+      setSelectedClassroomForQuiz(classrooms[0]);
+    }
+  }, [classrooms, selectedClassroomForQuiz]);
 
   if (loading || !user) return <PageLoader message="Verifying secure session..." />;
 
@@ -65,6 +74,32 @@ export default function TeacherDashboard() {
       alert("Error creating room: " + (error as Error).message);
     } finally {
       setIsCreatingRoom(false);
+    }
+  };
+
+  const handleQuickQuizClick = async () => {
+    if (!user) return;
+    if (classrooms.length === 0) {
+      setIsCreatingRoom(true);
+      try {
+        const newClass = await createClassroom(
+          "My First Class", 
+          "A default classroom created to host quizzes.", 
+          user.uid, 
+          user.displayName || "Educator"
+        );
+        setClassrooms([newClass]);
+        setSelectedClassroomForQuiz(newClass);
+        router.push(`/create-quiz/${newClass.roomCode}`);
+      } catch (error) {
+        alert("Failed to auto-create classroom: " + (error as Error).message);
+      } finally {
+        setIsCreatingRoom(false);
+      }
+    } else {
+      if (selectedClassroomForQuiz) {
+        router.push(`/create-quiz/${selectedClassroomForQuiz.roomCode}`);
+      }
     }
   };
 
@@ -196,6 +231,33 @@ export default function TeacherDashboard() {
                   <button onClick={() => router.push(`/classroom/${c.roomCode}`)} style={{ background: "rgba(160,124,254,0.1)", color: "#cfbcff", border: "1px solid rgba(160,124,254,0.2)", borderRadius: "6px", padding: "8px", fontSize: "0.825rem", fontWeight: 600, cursor: "pointer", width: "100%", marginTop: "4px", transition: "all 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(160,124,254,0.2)")} onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(160,124,254,0.1)")}>
                     Enter Classroom
                   </button>
+                  <button
+                    onClick={() => {
+                      router.push(`/create-quiz/${c.roomCode}`);
+                    }}
+                    style={{
+                      background: "rgba(160, 124, 254, 0.15)",
+                      color: "#cfbcff",
+                      border: "1px solid rgba(160, 124, 254, 0.35)",
+                      borderRadius: "6px",
+                      padding: "8px",
+                      fontSize: "0.825rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      width: "100%",
+                      transition: "all 0.2s",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      marginTop: "4px"
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(160, 124, 254, 0.25)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(160, 124, 254, 0.15)")}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>assignment_add</span>
+                    Generate Quiz
+                  </button>
                 </div>
               ))}
             </div>
@@ -204,6 +266,43 @@ export default function TeacherDashboard() {
               You haven't created any classrooms yet. Use the form above to create one!
             </div>
           )}
+        </div>
+
+        {/* ── Generate Quiz Action Card ────────────────────────────── */}
+        <div className="glass-card" style={{ borderRadius: "16px", padding: "24px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "20px", border: "1px solid rgba(160,124,254,0.2)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: "rgba(160,124,254,0.15)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(160,124,254,0.3)" }}>
+              <span className="material-symbols-outlined" style={{ color: "#cfbcff", fontSize: "26px" }}>assignment_add</span>
+            </div>
+            <div>
+              <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#e3e1e9", margin: 0 }}>Quick Quiz Creator</h3>
+              <p style={{ fontSize: "0.825rem", color: "#cbc3d5", margin: "4px 0 0 0" }}>Draft questions manually or auto-generate a quiz for any of your classrooms.</p>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+            {classrooms.length > 0 && (
+              <select 
+                onChange={(e) => {
+                  const selected = classrooms.find(c => c.id === e.target.value);
+                  if (selected) setSelectedClassroomForQuiz(selected);
+                }}
+                value={selectedClassroomForQuiz?.id || ""}
+                style={{ padding: "10px 16px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "8px", color: "#e3e1e9", fontSize: "0.875rem", outline: "none", width: "220px", cursor: "pointer" }}
+              >
+                {classrooms.map(c => (
+                  <option key={c.id} value={c.id} style={{ background: "#1a1b21" }}>{c.name}</option>
+                ))}
+              </select>
+            )}
+            <button 
+              onClick={handleQuickQuizClick}
+              disabled={isCreatingRoom}
+              style={primaryBtn}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>bolt</span>
+              {isCreatingRoom && classrooms.length === 0 ? "Creating Classroom..." : "Generate Quiz"}
+            </button>
+          </div>
         </div>
 
         {/* ── Stat Cards ──────────────────────────────────────────── */}
@@ -419,6 +518,8 @@ export default function TeacherDashboard() {
       <footer style={{ borderTop: "1px solid rgba(255,255,255,0.05)", padding: "20px 32px", textAlign: "center" }}>
         <span style={{ fontSize: "0.72rem", color: "#948e9f" }}>© 2026 EduAgent AI. Secured workspace portal.</span>
       </footer>
+
+
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
