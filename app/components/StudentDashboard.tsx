@@ -103,21 +103,35 @@ export default function StudentDashboard() {
 
       if (!res.ok) throw new Error("Failed to send message");
 
-      setMessages(prev => [...prev, { role: 'ai', text: "" }]); // Add empty AI message to stream into
-
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       if (!reader) return;
 
+      setMessages(prev => [...prev, { role: 'ai', text: "" }]); // Add empty AI message to stream into
+
       while (true) {
         const { value, done } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        setMessages(prev => {
-          const newMsgs = [...prev];
-          newMsgs[newMsgs.length - 1].text += chunk;
-          return newMsgs;
-        });
+        if (done) {
+          const finalChunk = decoder.decode();
+          if (finalChunk) {
+            setMessages(prev => {
+              const newMsgs = [...prev];
+              const lastIndex = newMsgs.length - 1;
+              newMsgs[lastIndex] = { ...newMsgs[lastIndex], text: newMsgs[lastIndex].text + finalChunk };
+              return newMsgs;
+            });
+          }
+          break;
+        }
+        const chunk = decoder.decode(value, { stream: true });
+        if (chunk) {
+          setMessages(prev => {
+            const newMsgs = [...prev];
+            const lastIndex = newMsgs.length - 1;
+            newMsgs[lastIndex] = { ...newMsgs[lastIndex], text: newMsgs[lastIndex].text + chunk };
+            return newMsgs;
+          });
+        }
       }
     } catch (err) {
       console.error(err);

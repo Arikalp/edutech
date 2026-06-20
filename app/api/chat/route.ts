@@ -69,27 +69,14 @@ export async function POST(req: Request) {
       const { GoogleGenAI } = await import('@google/genai');
       const ai = new GoogleGenAI({ apiKey: geminiApiKey });
       
-      // Convert standard {role, content} to Gemini format (user vs model)
-      const geminiMessages = messages.map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }]
-      }));
-      
-      const prompt = geminiMessages.pop();
-
-      const responseStream = await ai.models.generateContentStream({
-        model: 'gemini-3.1-flash-lite',
-        contents: [prompt],
-        // GoogleGenAI SDK supports basic prompt directly if we just pass the last message.
-        // Full conversation history is more complex in the new SDK without startChat, so we just pass the whole thing as a single prompt block to keep it simple and robust:
-      });
-
+      // Build full conversation context for stateless multi-turn
+      const fullHistoryContext = messages.map((m: { role: string; content: string }) => 
+        `${m.role.toUpperCase()}: ${m.content}`
+      ).join("\n\n");
+            
       const stream = new ReadableStream({
         async start(controller) {
           try {
-            // Re-call with full stringified conversation context to support multi-turn history accurately in stateless mode
-            const fullHistoryContext = messages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
-            
             const fullStream = await ai.models.generateContentStream({
               model: 'gemini-3.1-flash-lite',
               contents: `Here is the chat history:\n\n${fullHistoryContext}\n\nPlease respond to the user's last message.`

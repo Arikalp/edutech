@@ -323,6 +323,7 @@ export async function getTeacherStudentsAnalytics(teacherId: string) {
 
   // Map to hold student analytics: key = studentId
   const studentStats = new Map<string, { 
+    studentId: string,
     name: string, 
     totalScore: number, 
     quizCount: number, 
@@ -340,6 +341,7 @@ export async function getTeacherStudentsAnalytics(teacherId: string) {
       const sId = data.studentId;
       if (!studentStats.has(sId)) {
         studentStats.set(sId, { 
+          studentId: sId,
           name: data.studentName || 'Student', 
           totalScore: 0, 
           quizCount: 0, 
@@ -367,6 +369,7 @@ export async function getTeacherStudentsAnalytics(teacherId: string) {
     }
 
     return {
+      studentId: stat.studentId,
       name: stat.name,
       avatarSeed: stat.avatarSeed,
       progress: avgScore,

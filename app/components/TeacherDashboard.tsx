@@ -93,9 +93,17 @@ export default function TeacherDashboard() {
 
       while (true) {
         const { value, done } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
-        setGeneratedPlan(prev => (prev || "") + chunk);
+        if (done) {
+          const finalChunk = decoder.decode();
+          if (finalChunk) {
+            setGeneratedPlan(prev => (prev || "") + finalChunk);
+          }
+          break;
+        }
+        const chunk = decoder.decode(value, { stream: true });
+        if (chunk) {
+          setGeneratedPlan(prev => (prev || "") + chunk);
+        }
       }
     } catch (error) {
       console.error(error);
@@ -336,18 +344,18 @@ export default function TeacherDashboard() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {studentAnalytics.length > 0 ? studentAnalytics.map((st, i) => (
+            {studentAnalytics.length > 0 ? studentAnalytics.map((st: any) => (
               <div
-                key={i}
+                key={st.studentId}
                 onClick={() => setSelectedStudent(st)}
                 style={{
-                  background: selectedStudent?.name === st.name ? "rgba(160,124,254,0.07)" : "rgba(255,255,255,0.02)",
-                  border: `1px solid ${selectedStudent?.name === st.name ? "rgba(160,124,254,0.3)" : "rgba(255,255,255,0.05)"}`,
+                  background: selectedStudent?.studentId === st.studentId ? "rgba(160,124,254,0.07)" : "rgba(255,255,255,0.02)",
+                  border: `1px solid ${selectedStudent?.studentId === st.studentId ? "rgba(160,124,254,0.3)" : "rgba(255,255,255,0.05)"}`,
                   borderRadius: "12px", padding: "16px 20px", display: "flex", alignItems: "center",
                   justifyContent: "space-between", cursor: "pointer", transition: "all 0.2s",
                 }}
-                onMouseEnter={(e) => { if (selectedStudent?.name !== st.name) { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; } }}
-                onMouseLeave={(e) => { if (selectedStudent?.name !== st.name) { e.currentTarget.style.background = "rgba(255,255,255,0.02)"; } }}
+                onMouseEnter={(e) => { if (selectedStudent?.studentId !== st.studentId) { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; } }}
+                onMouseLeave={(e) => { if (selectedStudent?.studentId !== st.studentId) { e.currentTarget.style.background = "rgba(255,255,255,0.02)"; } }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", width: "240px" }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -24,12 +24,6 @@ export default function QuizReviewModal({ isOpen, onClose, quiz }: QuizReviewMod
     }
   }, [analysis]);
 
-  useEffect(() => {
-    if (isOpen && quiz && !analysis && !isAnalyzing) {
-      generateAnalysis(quiz);
-    }
-  }, [isOpen, quiz]);
-
   const generateAnalysis = async (quizData: QuizResult) => {
     setIsAnalyzing(true);
     setError("");
@@ -51,13 +45,16 @@ export default function QuizReviewModal({ isOpen, onClose, quiz }: QuizReviewMod
       // Handle streaming response
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let done = false;
 
-      while (!done) {
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading;
-        const chunkValue = decoder.decode(value);
-        setAnalysis((prev) => prev + chunkValue);
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          const finalChunk = decoder.decode();
+          if (finalChunk) setAnalysis((prev) => prev + finalChunk);
+          break;
+        }
+        const chunkValue = decoder.decode(value, { stream: true });
+        if (chunkValue) setAnalysis((prev) => prev + chunkValue);
       }
     } catch (err: any) {
       console.error(err);
@@ -66,6 +63,13 @@ export default function QuizReviewModal({ isOpen, onClose, quiz }: QuizReviewMod
       setIsAnalyzing(false);
     }
   };
+
+  useEffect(() => {
+    if (isOpen && quiz && !analysis && !isAnalyzing) {
+      generateAnalysis(quiz);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, quiz]);
 
   if (!isOpen || !quiz) return null;
 
