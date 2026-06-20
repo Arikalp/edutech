@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClassroom, getTeacherClassrooms, getTeacherStudentsAnalytics, Classroom, getClassroomQuizzes, Quiz, updateClassroomQuiz, QuizQuestion } from "../../lib/firestore";
+import { createClassroom, getTeacherClassrooms, getTeacherStudentsAnalytics, Classroom, getClassroomQuizzes, Quiz, updateClassroomQuiz, QuizQuestion, deleteClassroom } from "../../lib/firestore";
 import DashboardNav from "../components/DashboardNav";
 import PageLoader from "../components/PageLoader";
 import QuickAlert from "./QuickAlert";
+import DeleteClassroomConfirmModal from "./DeleteClassroomConfirmModal";
 
 // The mockStudents array has been removed as we are now using real analytics data
 
@@ -47,6 +48,8 @@ export default function TeacherDashboard() {
   const [editingError, setEditingError] = useState("");
   const [isSyncingRoster, setIsSyncingRoster] = useState(false);
   const [showSyncToast, setShowSyncToast] = useState(false);
+  const [classroomToDelete, setClassroomToDelete] = useState<Classroom | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push("/");
@@ -96,6 +99,28 @@ export default function TeacherDashboard() {
       alert("Error creating room: " + (error as Error).message);
     } finally {
       setIsCreatingRoom(false);
+    }
+  };
+
+  const handleDeleteClassroom = async () => {
+    if (!classroomToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteClassroom(classroomToDelete.id);
+      // Remove deleted classroom from local state
+      const remaining = classrooms.filter(c => c.id !== classroomToDelete.id);
+      setClassrooms(remaining);
+      
+      // If the deleted classroom was selected for quiz, reset it to another if available
+      if (selectedClassroomForQuiz?.id === classroomToDelete.id) {
+        setSelectedClassroomForQuiz(remaining.length > 0 ? remaining[0] : null);
+      }
+      
+      setClassroomToDelete(null);
+    } catch (error) {
+      alert("Error deleting classroom: " + (error as Error).message);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -363,9 +388,37 @@ export default function TeacherDashboard() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "16px", marginTop: "10px" }}>
               {classrooms.map(c => (
                 <div key={c.id} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(160,124,254,0.2)", borderRadius: "10px", padding: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                    <h4 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#e3e1e9", margin: 0 }}>{c.name}</h4>
-                    <span style={{ fontSize: "0.7rem", color: "#cfbcff", background: "rgba(160,124,254,0.1)", padding: "2px 8px", borderRadius: "4px", fontWeight: 600 }}>{c.students?.length || 0} Students</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+                    <h4 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#e3e1e9", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }} title={c.name}>{c.name}</h4>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+                      <span style={{ fontSize: "0.7rem", color: "#cfbcff", background: "rgba(160,124,254,0.1)", padding: "2px 8px", borderRadius: "4px", fontWeight: 600 }}>{c.students?.length || 0} Students</span>
+                      <button 
+                        onClick={() => setClassroomToDelete(c)}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          color: "#948e9f",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: "4px",
+                          borderRadius: "4px",
+                          transition: "all 0.2s",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
+                          e.currentTarget.style.color = "#f87171";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "transparent";
+                          e.currentTarget.style.color = "#948e9f";
+                        }}
+                        title="Delete Classroom"
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>delete</span>
+                      </button>
+                    </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "0.85rem", color: "#cbc3d5", background: "rgba(0,0,0,0.2)", padding: "6px 10px", borderRadius: "6px", width: "fit-content" }}>
                     <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#948e9f" }}>vpn_key</span>
@@ -986,6 +1039,13 @@ export default function TeacherDashboard() {
           </div>
         </div>
       )}
+
+      <DeleteClassroomConfirmModal
+        isOpen={!!classroomToDelete}
+        classroomName={classroomToDelete?.name || ""}
+        onClose={() => setClassroomToDelete(null)}
+        onConfirm={handleDeleteClassroom}
+      />
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>

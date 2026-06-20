@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, getDoc, getDocs, query, where, arrayUnion, serverTimestamp, updateDoc, addDoc, orderBy } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, getDocs, query, where, arrayUnion, serverTimestamp, updateDoc, addDoc, orderBy, deleteDoc } from "firebase/firestore";
 import { db } from "../Firebaseconfig";
 
 export interface Classroom {
@@ -136,6 +136,15 @@ export async function getTeacherClassrooms(teacherId: string): Promise<Classroom
     const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
     return timeB - timeA;
   });
+}
+
+/**
+ * Deletes a classroom from Firestore
+ */
+export async function deleteClassroom(classDocId: string): Promise<void> {
+  if (!db) throw new Error("Firestore is not initialized.");
+  const classDocRef = doc(db, "classrooms", classDocId);
+  await deleteDoc(classDocRef);
 }
 
 /**
