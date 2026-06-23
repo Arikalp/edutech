@@ -67,8 +67,9 @@ const mockPastMeetings: PastMeeting[] = [
 export default function Profile() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
-  const { userProfile, studentData } = useAppStore();
-  const { classrooms } = studentData;
+  const { userProfile, studentData, teacherData } = useAppStore();
+  const { classrooms: studentClassrooms, pastQuizzes } = studentData;
+  const { classrooms: teacherClassrooms, studentAnalytics } = teacherData;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<PastMeeting | null>(mockPastMeetings[0]);
   const [confirmSignoutOpen, setConfirmSignoutOpen] = useState(false);
@@ -79,18 +80,33 @@ export default function Profile() {
 
   if (loading || !user) return <PageLoader message="Loading your profile..." />;
 
-  const isTeacher = user.role === "teacher" || !user.role; // Default legacy accounts to teacher if role missing
-  
+  const isTeacher = userProfile?.role === "teacher" || (!userProfile?.role && user?.role === "teacher");
+
+  const avgEngagementStr = studentAnalytics.length > 0 
+    ? Math.round(studentAnalytics.reduce((sum: number, s: any) => sum + parseInt(s.engagement || "0"), 0) / studentAnalytics.length) + "%"
+    : "0%";
+
   const teacherStats = [
-    { value: "24", label: "Sessions Hosted", color: "#cfbcff" },
-    { value: "18.5h", label: "Classroom Hours", color: "#cfbcff" },
-    { value: "92%", label: "Avg Engagement", color: "#4ade80" },
+    { value: teacherClassrooms.length.toString(), label: "Sessions Hosted", color: "#cfbcff" },
+    { value: studentAnalytics.length.toString(), label: "Students Tracked", color: "#cfbcff" },
+    { value: avgEngagementStr, label: "Avg Engagement", color: "#4ade80" },
   ];
 
+  const avgScore = pastQuizzes.length > 0 
+    ? Math.round(pastQuizzes.reduce((sum, q) => sum + q.score, 0) / pastQuizzes.length) 
+    : 0;
+  
+  let averageGrade = "N/A";
+  if (avgScore >= 90) averageGrade = "A";
+  else if (avgScore >= 80) averageGrade = "B";
+  else if (avgScore >= 70) averageGrade = "C";
+  else if (avgScore >= 60) averageGrade = "D";
+  else if (avgScore > 0) averageGrade = "F";
+
   const studentStats = [
-    { value: "3", label: "Active Courses", color: "#38bdf8" },
-    { value: "14", label: "Day Streak", color: "#f59e0b" },
-    { value: "A-", label: "Average Grade", color: "#4ade80" },
+    { value: studentClassrooms.length.toString(), label: "Active Courses", color: "#38bdf8" },
+    { value: pastQuizzes.length.toString(), label: "Completed Quizzes", color: "#f59e0b" },
+    { value: averageGrade, label: "Average Grade", color: "#4ade80" },
   ];
 
   const profileStats = isTeacher ? teacherStats : studentStats;
@@ -276,7 +292,7 @@ export default function Profile() {
             </div>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {classrooms.length > 0 ? classrooms.map(course => (
+              {studentClassrooms.length > 0 ? studentClassrooms.map(course => (
                 <div key={course.id} className="group flex flex-col gap-5 rounded-xl border border-white/5 bg-white/5 p-5 transition-all hover:bg-white/10 hover:border-secondary/30">
                   <div>
                     <h4 className="text-base font-bold text-white">{course.name}</h4>

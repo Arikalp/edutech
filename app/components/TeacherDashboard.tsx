@@ -19,18 +19,27 @@ import FloatingChatbot from "./FloatingChatbot";
 import { useAppStore } from "../store/useAppStore";
 import OnboardingWizard from "./OnboardingWizard";
 
-const statCards = [
-  { label: "Class Engagement", value: "94.2%", delta: "+0.8%", deltaColor: "#4ade80", sub: "vs weekly benchmark (93.4%)", icon: Users },
-  { label: "AI Adaptive Plans", value: "48", delta: "12 new", deltaColor: "#cfbcff", sub: "Tailored adjustments applied", icon: Lightbulb },
-  { label: "Active Curriculums", value: "8", delta: "Active", deltaColor: "#948e9f", sub: "Dynamic courses synced", icon: BookOpen },
-  { label: "Performance Score", value: "87.4%", delta: "+2.1%", deltaColor: "#4ade80", sub: "Growth over term average", icon: Activity },
-];
-
 export default function TeacherDashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const { teacherData, isHydrating, refreshData } = useAppStore();
   const { classrooms, studentAnalytics } = teacherData;
+
+  const avgEngagementStr = studentAnalytics.length > 0 
+    ? Math.round(studentAnalytics.reduce((sum: number, s: any) => sum + parseInt(s.engagement || "0"), 0) / studentAnalytics.length) + "%"
+    : "0%";
+    
+  const activeCurriculums = classrooms.length;
+  const performanceScore = studentAnalytics.length > 0 
+    ? Math.round(studentAnalytics.reduce((sum: number, s: any) => sum + s.progress, 0) / studentAnalytics.length) + "%"
+    : "0%";
+
+  const dynamicStatCards = [
+    { label: "Class Engagement", value: avgEngagementStr, delta: "Live", deltaColor: "#4ade80", sub: "Based on active sessions", icon: Users },
+    { label: "AI Adaptive Plans", value: "Available", delta: "Ready", deltaColor: "#cfbcff", sub: "Generate dynamically below", icon: Lightbulb },
+    { label: "Active Curriculums", value: activeCurriculums.toString(), delta: "Active", deltaColor: "#948e9f", sub: "Across all rooms", icon: BookOpen },
+    { label: "Performance Score", value: performanceScore, delta: "Live", deltaColor: "#4ade80", sub: "Average student score", icon: Activity },
+  ];
 
   const [subject, setSubject] = useState("Mathematics");
   const [focusArea, setFocusArea] = useState("Algebra foundations & equations");
@@ -503,7 +512,7 @@ export default function TeacherDashboard() {
             currentSpan={widgetSizes['stats'] || DEFAULT_SIZES['stats']}
           >
             <div className="grid h-full grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {statCards.map((c) => {
+              {dynamicStatCards.map((c) => {
                 const Icon = c.icon;
                 return (
                   <div key={c.label} className="relative overflow-hidden rounded-xl border border-white/5 bg-surface p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md flex flex-col justify-center h-full">

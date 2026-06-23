@@ -121,6 +121,11 @@ export default function StudentDashboard() {
 
   if (loading || !user || isHydrating) return <PageLoader message="Loading your dashboard..." />;
 
+  const completedCount = pastQuizzes.length;
+  const avgScore = pastQuizzes.length > 0 
+    ? Math.round(pastQuizzes.reduce((sum, q) => sum + q.score, 0) / pastQuizzes.length) 
+    : 0;
+
   const chartData = pastQuizzes.slice().reverse().map((q, idx) => ({
     name: `Q${idx + 1}`,
     score: q.score,
@@ -151,14 +156,13 @@ export default function StudentDashboard() {
               
               <div className="rounded-xl border border-white/5 bg-surface p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md h-full flex flex-col justify-center">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Completed</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Completed Quizzes</span>
                   <CheckCircle className="h-5 w-5 text-primary" />
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-white">48</span>
-                  <span className="text-xs font-semibold text-primary">+3 This Week</span>
+                  <span className="text-3xl font-bold text-white">{completedCount}</span>
                 </div>
-                <div className="mt-1 text-xs text-on-surface-variant/70">On track for term goal</div>
+                <div className="mt-1 text-xs text-on-surface-variant/70">Total quizzes taken</div>
               </div>
 
               <div className="rounded-xl border border-white/5 bg-surface p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md h-full flex flex-col justify-center">
@@ -167,10 +171,9 @@ export default function StudentDashboard() {
                   <TrendingUp className="h-5 w-5 text-emerald-400" />
                 </div>
                 <div className="mt-4 flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-white">92%</span>
-                  <span className="text-xs font-semibold text-emerald-400">+4%</span>
+                  <span className="text-3xl font-bold text-white">{avgScore}%</span>
                 </div>
-                <div className="mt-1 text-xs text-on-surface-variant/70">Compared to last month</div>
+                <div className="mt-1 text-xs text-on-surface-variant/70">Across all quizzes</div>
               </div>
 
               <div className="rounded-xl border border-white/5 bg-surface p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md h-full flex flex-col justify-center">
