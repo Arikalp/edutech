@@ -24,6 +24,12 @@ export default function EditProfileModal({ isOpen, onClose }: Props) {
 
   const isTeacher = userProfile.role === 'teacher';
 
+  const studentGrades = ["Middle School", "High School", "College/University", "Self-Taught", "Other"];
+  const teacherSubjects = ["Mathematics", "Science", "Literature & English", "History & Humanities", "Computer Science", "Multiple Subjects"];
+  
+  const studentGoals = ["Improve my grades", "Prepare for standardized tests", "Learn a new skill or language", "Get help with homework"];
+  const teacherGoals = ["Manage my classrooms", "Track student progress", "Create interactive quizzes", "Automate grading and analytics"];
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
@@ -54,13 +60,17 @@ export default function EditProfileModal({ isOpen, onClose }: Props) {
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Bio / Learning Goals</label>
             <div className="relative">
-              <User className="absolute left-3 top-3 h-5 w-5 text-on-surface-variant" />
-              <textarea
+              <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
+              <select
                 value={formData.bio}
                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                placeholder="Tell us a bit about yourself..."
-                className="w-full min-h-[100px] resize-none rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-primary/50 focus:bg-white/10"
-              />
+                className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-primary/50 focus:bg-white/10 appearance-none"
+              >
+                <option value="" disabled className="bg-background-deep text-on-surface-variant">Select your primary goal...</option>
+                {(isTeacher ? teacherGoals : studentGoals).map(goal => (
+                  <option key={goal} value={goal} className="bg-background-deep text-white">{goal}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -69,13 +79,16 @@ export default function EditProfileModal({ isOpen, onClose }: Props) {
               <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Grade Level</label>
               <div className="relative">
                 <GraduationCap className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
-                <input
-                  type="text"
+                <select
                   value={formData.gradeLevel}
                   onChange={(e) => setFormData({ ...formData, gradeLevel: e.target.value })}
-                  placeholder="e.g. 10th Grade"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-primary/50 focus:bg-white/10"
-                />
+                  className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-primary/50 focus:bg-white/10 appearance-none"
+                >
+                  <option value="" disabled className="bg-background-deep text-on-surface-variant">Select your grade...</option>
+                  {studentGrades.map(opt => (
+                    <option key={opt} value={opt} className="bg-background-deep text-white">{opt}</option>
+                  ))}
+                </select>
               </div>
             </div>
           ) : (
@@ -83,13 +96,16 @@ export default function EditProfileModal({ isOpen, onClose }: Props) {
               <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Subjects Taught</label>
               <div className="relative">
                 <Book className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-on-surface-variant" />
-                <input
-                  type="text"
+                <select
                   value={formData.subjectsTaught}
                   onChange={(e) => setFormData({ ...formData, subjectsTaught: e.target.value })}
-                  placeholder="e.g. High School Physics"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-primary/50 focus:bg-white/10"
-                />
+                  className="w-full rounded-xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-sm text-white outline-none transition-colors focus:border-primary/50 focus:bg-white/10 appearance-none"
+                >
+                  <option value="" disabled className="bg-background-deep text-on-surface-variant">Select your subject...</option>
+                  {teacherSubjects.map(opt => (
+                    <option key={opt} value={opt} className="bg-background-deep text-white">{opt}</option>
+                  ))}
+                </select>
               </div>
             </div>
           )}
