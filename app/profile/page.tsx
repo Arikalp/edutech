@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import DashboardNav from "../components/DashboardNav";
 import PageLoader from "../components/PageLoader";
 import SignoutConfirmModal from "../components/SignoutConfirmModal";
-import { LogOut, History, Clock, Users, BookOpen, BrainCircuit, SidebarClose, ChevronRight, Activity, TrendingUp } from "lucide-react";
-
-import { getStudentClassrooms, Classroom } from "../../lib/firestore";
+import { LogOut, History, Clock, Users, BookOpen, BrainCircuit, SidebarClose, ChevronRight, Activity, TrendingUp, Edit3 } from "lucide-react";
+import { useAppStore } from "../store/useAppStore";
+import EditProfileModal from "../components/EditProfileModal";
 
 // ── Teacher Types ──
 interface ParticipantPerformance {
@@ -67,19 +67,15 @@ const mockPastMeetings: PastMeeting[] = [
 export default function Profile() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const { userProfile, studentData } = useAppStore();
+  const { classrooms } = studentData;
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<PastMeeting | null>(mockPastMeetings[0]);
-  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [confirmSignoutOpen, setConfirmSignoutOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push("/");
   }, [user, loading, router]);
-
-  useEffect(() => {
-    if (user && user.role === "student") {
-      getStudentClassrooms(user.uid).then(setClassrooms).catch(console.error);
-    }
-  }, [user]);
 
   if (loading || !user) return <PageLoader message="Loading your profile..." />;
 
@@ -129,13 +125,22 @@ export default function Profile() {
               <p className="text-sm text-on-surface-variant">
                 {user.email}
               </p>
-              <button
-                onClick={() => setConfirmSignoutOpen(true)}
-                className="mt-3 flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/20"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </button>
+              <div className="flex items-center gap-3 mt-3">
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="flex items-center gap-2 rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                >
+                  <Edit3 className="h-4 w-4" />
+                  Edit Profile
+                </button>
+                <button
+                  onClick={() => setConfirmSignoutOpen(true)}
+                  className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/20"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              </div>
             </div>
           </div>
 
@@ -324,6 +329,11 @@ export default function Profile() {
           await logout();
           router.push("/");
         }}
+      />
+
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
       />
     </div>
   );

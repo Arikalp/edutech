@@ -18,15 +18,17 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStr
 import DraggableWidget from "./DraggableWidget";
 import FloatingChatbot from "./FloatingChatbot";
 import ClassHistoryModal from "./ClassHistoryModal";
+import { useAppStore } from "../store/useAppStore";
+import OnboardingWizard from "./OnboardingWizard";
 
 export default function StudentDashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const { studentData, isHydrating, refreshData } = useAppStore();
+  const { classrooms, upcomingQuizzes, pastQuizzes } = studentData;
+
   const [joinRoomId, setJoinRoomId] = useState("");
   const [isJoining, setIsJoining] = useState(false);
-  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
-  const [upcomingQuizzes, setUpcomingQuizzes] = useState<Quiz[]>([]);
-  const [pastQuizzes, setPastQuizzes] = useState<QuizResult[]>([]);
   const [takingQuiz, setTakingQuiz] = useState<Quiz | null>(null);
 
   const [selectedQuiz, setSelectedQuiz] = useState<QuizResult | null>(null);
@@ -91,20 +93,11 @@ export default function StudentDashboard() {
     if (!loading && !user) router.push("/");
   }, [user, loading, router]);
 
-  const refreshData = () => {
-    if (user) {
-      getStudentClassrooms(user.uid).then(setClassrooms).catch(console.error);
-      getStudentQuizzes(user.uid).then(setUpcomingQuizzes).catch(console.error);
-      getStudentQuizResults(user.uid).then(setPastQuizzes).catch(console.error);
-    }
-  };
-
   useEffect(() => {
     if (user) {
       const timer = setTimeout(() => {
         toast.info("New AI Insights Ready! Your Algebra Foundations Quiz analysis is ready to review. Let's tackle those weak areas!");
       }, 1500);
-      refreshData();
       return () => clearTimeout(timer);
     }
   }, [user]);
@@ -126,7 +119,7 @@ export default function StudentDashboard() {
     }
   };
 
-  if (loading || !user) return <PageLoader message="Loading your dashboard..." />;
+  if (loading || !user || isHydrating) return <PageLoader message="Loading your dashboard..." />;
 
   const chartData = pastQuizzes.slice().reverse().map((q, idx) => ({
     name: `Q${idx + 1}`,
@@ -467,6 +460,7 @@ export default function StudentDashboard() {
       </main>
 
       <FloatingChatbot />
+      <OnboardingWizard />
 
       <footer className="mt-auto border-t border-white/5 py-6 text-center text-xs text-on-surface-variant">
         © 2026 EduAgent AI. Secured workspace portal. Developed by team <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#4ADE80]">Code Thrifters</span>

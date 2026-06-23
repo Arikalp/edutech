@@ -16,6 +16,8 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
 import DraggableWidget from "./DraggableWidget";
 import FloatingChatbot from "./FloatingChatbot";
+import { useAppStore } from "../store/useAppStore";
+import OnboardingWizard from "./OnboardingWizard";
 
 const statCards = [
   { label: "Class Engagement", value: "94.2%", delta: "+0.8%", deltaColor: "#4ade80", sub: "vs weekly benchmark (93.4%)", icon: Users },
@@ -27,6 +29,8 @@ const statCards = [
 export default function TeacherDashboard() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const { teacherData, isHydrating, refreshData } = useAppStore();
+  const { classrooms, studentAnalytics } = teacherData;
 
   const [subject, setSubject] = useState("Mathematics");
   const [focusArea, setFocusArea] = useState("Algebra foundations & equations");
@@ -34,8 +38,6 @@ export default function TeacherDashboard() {
   const [generatedPlan, setGeneratedPlan] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
   
-  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
-  const [studentAnalytics, setStudentAnalytics] = useState<any[]>([]);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const [newRoomName, setNewRoomName] = useState("");
   
@@ -113,14 +115,10 @@ export default function TeacherDashboard() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user) {
-      getTeacherClassrooms(user.uid).then(setClassrooms).catch(console.error);
-      getTeacherStudentsAnalytics(user.uid).then(data => {
-        setStudentAnalytics(data);
-        if (data.length > 0) setSelectedStudent(data[0]);
-      }).catch(console.error);
+    if (studentAnalytics.length > 0 && !selectedStudent) {
+      setSelectedStudent(studentAnalytics[0]);
     }
-  }, [user]);
+  }, [studentAnalytics]);
 
   useEffect(() => {
     if (classrooms.length > 0) {
@@ -138,7 +136,7 @@ export default function TeacherDashboard() {
     }
   }, [classrooms, selectedClassroomForQuiz]);
 
-  if (loading || !user) return <PageLoader message="Verifying secure session..." />;
+  if (loading || !user || isHydrating) return <PageLoader message="Verifying secure session..." />;
 
   const handleCreateClassroom = async () => {
     if (!user || !newRoomName.trim()) return;
@@ -150,7 +148,7 @@ export default function TeacherDashboard() {
         user.uid, 
         user.displayName || "Educator"
       );
-      setClassrooms([newClass, ...classrooms]);
+      await refreshData();
       setNewRoomName("");
     } catch (error) {
       toast.error("Error creating room: " + (error as Error).message);
@@ -164,10 +162,9 @@ export default function TeacherDashboard() {
     setIsDeleting(true);
     try {
       await deleteClassroom(classroomToDelete.id);
-      const remaining = classrooms.filter(c => c.id !== classroomToDelete.id);
-      setClassrooms(remaining);
+      await refreshData();
       if (selectedClassroomForQuiz?.id === classroomToDelete.id) {
-        setSelectedClassroomForQuiz(remaining.length > 0 ? remaining[0] : null);
+        setSelectedClassroomForQuiz(null);
       }
       setClassroomToDelete(null);
       toast.success("Classroom deleted successfully.");
@@ -189,7 +186,7 @@ export default function TeacherDashboard() {
           user.uid, 
           user.displayName || "Educator"
         );
-        setClassrooms([newClass]);
+        await refreshData();
         setSelectedClassroomForQuiz(newClass);
         router.push(`/create-quiz/${newClass.roomCode}`);
       } catch (error) {
@@ -835,8 +832,9 @@ export default function TeacherDashboard() {
       </main>
 
       <FloatingChatbot />
+      <OnboardingWizard />
 
-      <footer className="border-t border-white/5 py-6 text-center text-xs text-on-surface-variant mt-auto">
+      <footer className="mt-auto border-t border-white/5 py-6 text-center text-xs text-on-surface-variant">
         © 2026 EduAgent AI. Secured workspace portal. Developed by team <span className="font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#4ADE80]">Code Thrifters</span>
       </footer>
 
