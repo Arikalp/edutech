@@ -13,6 +13,8 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, googleProvider, isFirebaseConfigured, db } from "../../Firebaseconfig";
+import { useAppStore } from "../store/useAppStore";
+import { getUserProfile } from "../../lib/firestore";
 
 export interface UserProfile {
   uid: string;
@@ -21,6 +23,11 @@ export interface UserProfile {
   photoURL: string | null;
   role?: "teacher" | "student";
   isMock?: boolean;
+  bio?: string;
+  gradeLevel?: string;
+  subjectsTaught?: string;
+  school?: string;
+  hasCompletedOnboarding?: boolean;
 }
 
 interface AuthContextType {
@@ -45,26 +52,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
           let role: "teacher" | "student" = "student";
+          let additionalData = {};
           if (db) {
             try {
-              const docSnap = await getDoc(doc(db, "users", firebaseUser.uid));
-              if (docSnap.exists() && docSnap.data().role) {
-                role = docSnap.data().role;
+              const profileData = await getUserProfile(firebaseUser.uid);
+              if (profileData) {
+                if (profileData.role) role = profileData.role;
+                additionalData = profileData;
               }
             } catch (e) {
-              console.error("Failed to fetch user role from Firestore", e);
+              console.error("Failed to fetch user profile from Firestore", e);
             }
           }
-          setUser({
+          const profile = {
             uid: firebaseUser.uid,
             email: firebaseUser.email,
             displayName: firebaseUser.displayName,
             photoURL: firebaseUser.photoURL,
             role,
             isMock: false,
-          });
+            ...additionalData
+          };
+          setUser(profile);
+          useAppStore.getState().setUserProfile(profile);
+          useAppStore.getState().refreshData();
         } else {
           setUser(null);
+          useAppStore.getState().setUserProfile(null);
         }
         setLoading(false);
       });
@@ -74,7 +88,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const savedUser = localStorage.getItem("mindhub_demo_user");
       if (savedUser) {
         try {
-          setUser(JSON.parse(savedUser));
+          const profile = JSON.parse(savedUser);
+          setUser(profile);
+          useAppStore.getState().setUserProfile(profile);
+          useAppStore.getState().refreshData();
         } catch (e) {
           console.error("Failed to parse local storage demo user", e);
         }
@@ -89,10 +106,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!isDemoMode && auth) {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const fbUser = userCredential.user;
-        let role: "teacher" | "student" = "student";
+        let additionalData = {};
         if (db) {
-          const docSnap = await getDoc(doc(db, "users", fbUser.uid));
-          if (docSnap.exists() && docSnap.data().role) role = docSnap.data().role;
+          const profileData = await getUserProfile(fbUser.uid);
+          if (profileData) {
+            if (profileData.role) role = profileData.role;
+            additionalData = profileData;
+          }
         }
         const profile: UserProfile = {
           uid: fbUser.uid,
@@ -101,8 +121,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           photoURL: fbUser.photoURL,
           role,
           isMock: false,
+          ...additionalData
         };
         setUser(profile);
+        useAppStore.getState().setUserProfile(profile);
+        useAppStore.getState().refreshData();
         return profile;
       } else {
         // Mock authentication
@@ -120,6 +143,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           };
           localStorage.setItem("mindhub_demo_user", JSON.stringify(profile));
           setUser(profile);
+          useAppStore.getState().setUserProfile(profile);
+          useAppStore.getState().refreshData();
           return profile;
         } else if (accounts[email]) {
           throw new Error("auth/wrong-password");
@@ -153,6 +178,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           isMock: false,
         };
         setUser(profile);
+        useAppStore.getState().setUserProfile(profile);
+        useAppStore.getState().refreshData();
         return profile;
       } else {
         // Mock Registration
@@ -171,6 +198,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
         localStorage.setItem("mindhub_demo_user", JSON.stringify(profile));
         setUser(profile);
+        useAppStore.getState().setUserProfile(profile);
+        useAppStore.getState().refreshData();
         return profile;
       }
     } catch (error: any) {
@@ -197,12 +226,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           throw { code: "auth/account-not-found", message: "User not registered, please register." };
         }
 
-        let finalRole: "teacher" | "student" = role || "student";
+        let additionalData = {};
         if (db) {
-          const docSnap = await getDoc(doc(db, "users", fbUser.uid));
-          if (docSnap.exists() && docSnap.data().role) {
+          const profileData = await getUserProfile(fbUser.uid);
+          if (profileData) {
             // They already have an account and a role in Firestore
-            finalRole = docSnap.data().role;
+            if (profileData.role) finalRole = profileData.role;
+            additionalData = profileData;
           } else {
             // First time signup or role missing
             await setDoc(doc(db, "users", fbUser.uid), { role: finalRole });
@@ -215,8 +245,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           photoURL: fbUser.photoURL,
           role: finalRole,
           isMock: false,
+          ...additionalData
         };
         setUser(profile);
+        useAppStore.getState().setUserProfile(profile);
+        useAppStore.getState().refreshData();
         return profile;
       } else {
         // Mock Google Login
@@ -246,6 +279,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         localStorage.setItem("mindhub_demo_user", JSON.stringify(profile));
         setUser(profile);
+        useAppStore.getState().setUserProfile(profile);
+        useAppStore.getState().refreshData();
         return profile;
       }
     } catch (error: any) {
@@ -266,6 +301,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       localStorage.removeItem("mindhub_demo_user");
       setUser(null);
+      useAppStore.getState().setUserProfile(null);
       setLoading(false);
     }
   };

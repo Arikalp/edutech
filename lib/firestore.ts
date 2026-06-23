@@ -502,3 +502,25 @@ export async function getClassroomNotes(roomId: string): Promise<ClassroomNote[]
     ...doc.data()
   } as ClassroomNote));
 }
+
+/**
+ * Gets additional user profile details from Firestore.
+ */
+export async function getUserProfile(uid: string) {
+  if (!db) return null;
+  const userDocRef = doc(db, "users", uid);
+  const userDoc = await getDoc(userDocRef);
+  if (userDoc.exists()) {
+    return userDoc.data();
+  }
+  return null;
+}
+
+/**
+ * Updates a user's profile with progressive profiling fields.
+ */
+export async function updateUserProfile(uid: string, fields: any) {
+  if (!db) return;
+  const userDocRef = doc(db, "users", uid);
+  await updateDoc(userDocRef, fields);
+}
