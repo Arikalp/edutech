@@ -49,7 +49,7 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="max-w-[1280px] mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
         <span className="text-xs text-on-surface-variant opacity-80">
-          © 2026 EduAgent AI. Empowering the next generation of educators.
+          © 2026 EduAgent AI. Empowering the next generation of educators. Developed by team Code Thrifters
         </span>
         <div className="flex gap-6">
           <a href="#" className="text-on-surface-variant hover:text-primary transition-colors">

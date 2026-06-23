@@ -313,7 +313,7 @@ export default function Profile() {
       </main>
 
       <footer className="mt-auto border-t border-white/5 py-6 text-center text-xs text-on-surface-variant">
-        © 2026 EduAgent AI. All rights reserved.
+        © 2026 EduAgent AI. All rights reserved. Developed by team Code Thrifters
       </footer>
 
       <SignoutConfirmModal

@@ -469,7 +469,7 @@ export default function StudentDashboard() {
       <FloatingChatbot />
 
       <footer className="mt-auto border-t border-white/5 py-6 text-center text-xs text-on-surface-variant">
-        © 2026 EduAgent AI. Secured workspace portal.
+        © 2026 EduAgent AI. Secured workspace portal. Developed by team Code Thrifters
       </footer>
     </div>
   );

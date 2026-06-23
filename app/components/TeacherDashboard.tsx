@@ -837,7 +837,7 @@ export default function TeacherDashboard() {
       <FloatingChatbot />
 
       <footer className="border-t border-white/5 py-6 text-center text-xs text-on-surface-variant mt-auto">
-        © 2026 EduAgent AI. Secured workspace portal.
+        © 2026 EduAgent AI. Secured workspace portal. Developed by team Code Thrifters
       </footer>
 
       {/* Editing Quiz Modal remains unchanged */}
