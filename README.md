@@ -86,6 +86,17 @@ edutech/
 
 ---
 
+## 📈 Scalability & Architecture
+
+EduAgent is architected to scale from a single classroom to an institution-wide deployment with minimal infrastructure overhead:
+
+- **Selective Forwarding Unit (SFU) WebRTC (LiveKit)**: Unlike legacy peer-to-peer (Mesh) WebRTC where client bandwidth scales quadratically ($O(N^2)$), EduAgent leverages LiveKit’s Go-based SFU. Clients publish their media once ($O(1)$ upload), and the SFU forwards it, allowing rooms to comfortably scale to hundreds of concurrent video streams.
+- **Serverless & Edge-Ready Next.js Runtime**: The Next.js framework allows API endpoints (such as LiveKit JWT token generation) to be deployed as serverless functions. This ensures the backend handles sudden traffic spikes elastically, scaling down to zero when inactive to save costs.
+- **Serverless Real-Time Data Layer (Firebase Firestore)**: By utilizing a document database designed for massive concurrency, Firestore automatically handles horizontal scaling, sharding, and real-time syncing for millions of concurrent users.
+- **Decoupled AI Processing**: Long-running operations like audio-to-text transcript processing and student analytics compilation are designed to be decoupled from the main thread, keeping the user interface highly responsive.
+
+---
+
 ## 🚀 Getting Started
 
 Follow these steps to set up and run EduAgent locally.
