@@ -17,6 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full scroll-smooth antialiased dark" suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#090A0F" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <link rel="apple-touch-icon" href="/icon.png" />
+        
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* Google Fonts: Inter + Geist */}
@@ -35,6 +40,24 @@ export default function RootLayout({
           {children}
           <ToastContainer theme="dark" position="top-right" autoClose={4000} />
         </AuthProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(
+                    function(registration) {
+                      console.log('SW registered: ', registration.scope);
+                    },
+                    function(err) {
+                      console.log('SW registration failed: ', err);
+                    }
+                  );
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );
