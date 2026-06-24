@@ -632,6 +632,12 @@ body {
   --lk-text-color-secondary: #cbc3d5;
 }
 
+@media (max-width: 767px) {
+  :root, [data-lk-theme], [data-lk-theme="default"] {
+    --lk-control-bar-height: 0px !important;
+  }
+}
+
 /* Control Bar styling */
 .lk-control-bar {
   background: rgba(18, 19, 26, 0.85) !important;
@@ -672,6 +678,17 @@ body {
   background: rgba(239, 68, 68, 0.25) !important;
   border-color: rgba(239, 68, 68, 0.5) !important;
   color: #ffffff !important;
+}
+
+@media (max-width: 640px) {
+  .lk-control-bar {
+    padding: 8px 12px !important;
+    gap: 8px !important;
+  }
+  .lk-control-bar .lk-button {
+    padding: 8px 10px !important;
+    font-size: 0.8rem !important;
+  }
 }
 
 /* Chat container styles */

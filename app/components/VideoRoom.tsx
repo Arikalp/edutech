@@ -13,6 +13,8 @@ import {
   FocusLayoutContainer,
   FocusLayout,
   CarouselLayout,
+  useDisconnectButton,
+  useTrackToggle,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { Track } from "livekit-client";
@@ -30,6 +32,148 @@ interface VideoRoomProps {
   role: "teacher" | "student";
   userName: string;
   onLeave: () => void;
+}
+
+interface MobileControlBarProps {
+  onDeviceError?: (err: { source: Track.Source; error: Error }) => void;
+}
+
+function MobileControlBar({ onDeviceError }: MobileControlBarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const layoutContext = useLayoutContext();
+  const showChat = layoutContext.widget.state?.showChat;
+
+  const { buttonProps: micProps, enabled: micEnabled } = useTrackToggle({
+    source: Track.Source.Microphone,
+    onDeviceError: (err) => onDeviceError?.({ source: Track.Source.Microphone, error: err })
+  });
+
+  const { buttonProps: camProps, enabled: camEnabled } = useTrackToggle({
+    source: Track.Source.Camera,
+    onDeviceError: (err) => onDeviceError?.({ source: Track.Source.Camera, error: err })
+  });
+
+  const { buttonProps: screenProps, enabled: screenEnabled } = useTrackToggle({
+    source: Track.Source.ScreenShare,
+    captureOptions: { audio: true, selfBrowserSurface: "include" },
+    onDeviceError: (err) => onDeviceError?.({ source: Track.Source.ScreenShare, error: err })
+  });
+
+  const { buttonProps: leaveProps } = useDisconnectButton({});
+
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center">
+      {/* Floating Menu Overlay */}
+      {isOpen && (
+        <div className="mb-4 flex flex-col items-center gap-3 p-4 rounded-2xl bg-[#121318]/92 border border-white/10 backdrop-blur-xl shadow-2xl animate-fade-in-up">
+          {/* Microphone */}
+          <div className="flex flex-col items-center gap-1">
+            <button
+              {...micProps}
+              className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-300 ${
+                micEnabled
+                  ? "bg-[#A07CFE]/20 border-[#A07CFE]/45 text-[#cfbcff]"
+                  : "bg-red-500/10 border-red-500/30 text-red-400"
+              }`}
+              title="Toggle Mic"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>
+                {micEnabled ? "mic" : "mic_off"}
+              </span>
+            </button>
+            <span className="text-[10px] text-[#cbc3d5] font-semibold">Mic</span>
+          </div>
+
+          {/* Camera */}
+          <div className="flex flex-col items-center gap-1">
+            <button
+              {...camProps}
+              className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-300 ${
+                camEnabled
+                  ? "bg-[#A07CFE]/20 border-[#A07CFE]/45 text-[#cfbcff]"
+                  : "bg-red-500/10 border-red-500/30 text-red-400"
+              }`}
+              title="Toggle Camera"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>
+                {camEnabled ? "videocam" : "videocam_off"}
+              </span>
+            </button>
+            <span className="text-[10px] text-[#cbc3d5] font-semibold">Camera</span>
+          </div>
+
+          {/* Screen Share */}
+          <div className="flex flex-col items-center gap-1">
+            <button
+              {...screenProps}
+              className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-300 ${
+                screenEnabled
+                  ? "bg-[#A07CFE]/20 border-[#A07CFE]/45 text-[#cfbcff]"
+                  : "bg-white/5 border-white/10 text-[#cbc3d5]"
+              }`}
+              title="Share Screen"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                {screenEnabled ? "screen_share" : "stop_screen_share"}
+              </span>
+            </button>
+            <span className="text-[10px] text-[#cbc3d5] font-semibold">Share</span>
+          </div>
+
+          {/* Chat Toggle */}
+          <div className="flex flex-col items-center gap-1">
+            <button
+              onClick={() => {
+                layoutContext.widget.dispatch?.({ msg: "toggle_chat" });
+              }}
+              className={`w-12 h-12 rounded-full flex items-center justify-center border transition-all duration-300 ${
+                showChat
+                  ? "bg-[#A07CFE]/20 border-[#A07CFE]/45 text-[#cfbcff]"
+                  : "bg-white/5 border-white/10 text-[#cbc3d5]"
+              }`}
+              title="Toggle Chat"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                forum
+              </span>
+            </button>
+            <span className="text-[10px] text-[#cbc3d5] font-semibold">Chat</span>
+          </div>
+
+          {/* Leave Button */}
+          <div className="flex flex-col items-center gap-1">
+            <button
+              {...leaveProps}
+              className="w-12 h-12 rounded-full flex items-center justify-center border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all duration-300"
+              title="Leave Class"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+                logout
+              </span>
+            </button>
+            <span className="text-[10px] text-[#cbc3d5] font-semibold">Leave</span>
+          </div>
+        </div>
+      )}
+
+      {/* Main Hamburger FAB */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-14 h-14 rounded-full flex items-center justify-center border shadow-lg backdrop-blur-md transition-all duration-300 ${
+          isOpen
+            ? "bg-[#FE8495]/20 border-[#FE8495]/45 text-[#ffb2ba]"
+            : "bg-[#A07CFE]/20 border-[#A07CFE]/30 text-[#cfbcff]"
+        }`}
+        style={{
+          boxShadow: isOpen ? "0 0 20px rgba(254, 132, 149, 0.25)" : "0 0 15px rgba(207, 188, 255, 0.15)"
+        }}
+      >
+        <span className={`material-symbols-outlined transition-transform duration-300 ${isOpen ? "rotate-90" : ""}`} style={{ fontSize: "28px" }}>
+          {isOpen ? "close" : "tune"}
+        </span>
+      </button>
+    </div>
+  );
 }
 
 interface CustomVideoConferenceProps {
@@ -54,12 +198,19 @@ function CustomVideoConference({ handleDeviceError }: CustomVideoConferenceProps
     <div className="lk-video-conference" style={{ position: "relative" }}>
       <div className="lk-video-conference-inner">
         <StageArea />
-        <ControlBar
-          variation="verbose"
-          onDeviceError={handleDeviceError}
-        />
+        <div className="hidden md:block">
+          <ControlBar
+            variation="verbose"
+            onDeviceError={handleDeviceError}
+          />
+        </div>
       </div>
       {showChat && <Chat />}
+      
+      {/* Mobile Control Bar */}
+      <div className="md:hidden">
+        <MobileControlBar onDeviceError={handleDeviceError} />
+      </div>
       
       {/* Chat Toggle Button */}
       {!showChat && (
@@ -67,37 +218,37 @@ function CustomVideoConference({ handleDeviceError }: CustomVideoConferenceProps
           onClick={() => {
             layoutContext.widget.dispatch?.({ msg: "toggle_chat" });
           }}
+          className="hidden md:flex"
           style={{
             position: "absolute",
             bottom: "80px",
             right: "20px",
             zIndex: 1000,
             background: "rgba(30, 30, 35, 0.85)",
-          backdropFilter: "blur(8px)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
-          color: "#cfbcff",
-          borderRadius: "50%",
-          width: "44px",
-          height: "44px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          boxShadow: "0 4px 15px rgba(0,0,0,0.4)",
-          transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "rgba(160, 124, 254, 0.25)";
-          e.currentTarget.style.borderColor = "rgba(160, 124, 254, 0.4)";
-          e.currentTarget.style.color = "#ffffff";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "rgba(30, 30, 35, 0.85)";
-          e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
-          e.currentTarget.style.color = "#cfbcff";
-        }}
-        title={showChat ? "Hide Chat" : "Show Chat"}
-      >
+            backdropFilter: "blur(8px)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            color: "#cfbcff",
+            borderRadius: "50%",
+            width: "44px",
+            height: "44px",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.4)",
+            transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(160, 124, 254, 0.25)";
+            e.currentTarget.style.borderColor = "rgba(160, 124, 254, 0.4)";
+            e.currentTarget.style.color = "#ffffff";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(30, 30, 35, 0.85)";
+            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
+            e.currentTarget.style.color = "#cfbcff";
+          }}
+          title={showChat ? "Hide Chat" : "Show Chat"}
+        >
           <span className="material-symbols-outlined" style={{ fontSize: "22px" }}>
             forum
           </span>
@@ -481,6 +632,7 @@ export default function VideoRoom({ token, url, roomId, role, userName, onLeave 
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
             <button
               onClick={handleToggleListening}
+              className="w-full sm:w-auto"
               style={{
                 background: isListening ? "rgba(239, 68, 68, 0.2)" : "rgba(160,124,254,0.2)",
                 color: isListening ? "#f87171" : "#cfbcff",
@@ -488,7 +640,6 @@ export default function VideoRoom({ token, url, roomId, role, userName, onLeave 
                 borderRadius: "8px", padding: "8px 14px", fontSize: "0.85rem", fontWeight: 700,
                 cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
                 transition: "all 0.2s",
-                width: "100%",
               }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: "18px", animation: isListening ? "pulse 2s infinite" : "none" }}>
@@ -531,12 +682,12 @@ export default function VideoRoom({ token, url, roomId, role, userName, onLeave 
           <button 
             onClick={handleGenerateQuiz}
             disabled={isGenerating}
+            className="w-full md:w-auto"
             style={{
               background: "linear-gradient(90deg, #A07CFE 0%, #FE8495 50%, #FFD270 100%)",
               color: "#090A0F", border: "none", borderRadius: "8px", padding: "10px 16px",
               fontSize: "0.875rem", fontWeight: 700, cursor: isGenerating ? "not-allowed" : "pointer",
               display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", opacity: isGenerating ? 0.7 : 1,
-              width: "100%",
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>auto_awesome</span>
