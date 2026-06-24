@@ -79,7 +79,7 @@ export default function TakeQuizModal({ isOpen, onClose, quiz, onQuizSubmitted }
     <div style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(3, 3, 5, 0.8)", backdropFilter: "blur(8px)" }} />
       
-      <div className="glass-card" style={{ position: "relative", width: "100%", maxWidth: "600px", borderRadius: "16px", padding: "32px", display: "flex", flexDirection: "column", gap: "24px", maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 50px rgba(0,0,0,0.5)" }}>
+      <div className="glass-card w-full max-w-[600px] p-5 sm:p-8 rounded-2xl relative flex flex-col gap-6 max-h-[90vh] overflow-y-auto" style={{ boxShadow: "0 20px 50px rgba(0,0,0,0.5)" }}>
         
         {/* Header */}
         <div>

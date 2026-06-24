@@ -57,7 +57,7 @@ export default function HowItWorksSection() {
         </div>
 
         {/* Steps */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-16 md:gap-8 relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-16 md:gap-8 relative">
           {steps.map((s) => (
             <div
               key={s.step}
@@ -65,7 +65,7 @@ export default function HowItWorksSection() {
             >
               {/* Dashed connector line (not on last step) */}
               {s.showConnector && (
-                <div className="hidden md:block absolute top-8 left-16 right-[-2rem] h-[1px] border-t border-dashed border-white/15 -z-10" />
+                <div className="hidden lg:block absolute top-8 left-16 right-[-2rem] h-[1px] border-t border-dashed border-white/15 -z-10" />
               )}
 
               {/* Icon circle */}

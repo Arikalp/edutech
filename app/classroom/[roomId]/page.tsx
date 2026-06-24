@@ -33,22 +33,13 @@ function ShareBar({ roomId, role, roomQuiz, onJoinQuiz }: ShareBarProps) {
 
   return (
     <div
+      className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3.5 px-6 bg-[#12131a]/85 border-b border-white/10 text-on-surface z-50 backdrop-blur-xl"
       style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "12px 24px",
-        background: "rgba(18, 19, 26, 0.8)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-        color: "#e3e1e9",
         fontFamily: "var(--font-sans), Inter, sans-serif",
-        zIndex: 50,
       }}
     >
       {/* Left section: Back to Dashboard & Status */}
-      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+      <div className="flex items-center justify-between sm:justify-start gap-4 w-full sm:w-auto">
         <button
           onClick={() => router.push("/dashboard")}
           style={{
@@ -100,13 +91,13 @@ function ShareBar({ roomId, role, roomQuiz, onJoinQuiz }: ShareBarProps) {
             }}
           />
           <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#ffffff" }}>
-            Live Classroom
+            Live
           </span>
         </div>
       </div>
 
       {role === "student" && roomQuiz && (
-        <>
+        <div className="w-full sm:w-auto flex justify-center">
           <button
             onClick={onJoinQuiz}
             style={{
@@ -114,15 +105,17 @@ function ShareBar({ roomId, role, roomQuiz, onJoinQuiz }: ShareBarProps) {
               color: "#090A0F",
               border: "none",
               borderRadius: "8px",
-              padding: "8px 16px",
+              padding: "10px 20px",
               fontSize: "0.875rem",
               fontWeight: 700,
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
+              justifyContent: "center",
               gap: "6px",
               animation: "pulse 2s infinite ease-in-out",
-              transition: "transform 0.2s"
+              transition: "transform 0.2s",
+              width: "100%",
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>auto_awesome</span>
@@ -135,11 +128,11 @@ function ShareBar({ roomId, role, roomQuiz, onJoinQuiz }: ShareBarProps) {
               100% { transform: scale(1); box-shadow: 0 0 8px rgba(160,124,254,0.25); }
             }
           `}</style>
-        </>
+        </div>
       )}
 
       {/* Right section: Classroom Room Code & Copy Button */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
         <span
           style={{
             fontSize: "0.825rem",
@@ -190,7 +183,7 @@ function ShareBar({ roomId, role, roomQuiz, onJoinQuiz }: ShareBarProps) {
             <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
               {copied ? "check" : "content_copy"}
             </span>
-            {copied ? "Copied!" : "Copy Code"}
+            {copied ? "Copied!" : "Copy"}
           </button>
         </div>
       </div>

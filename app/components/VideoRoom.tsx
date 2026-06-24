@@ -477,17 +477,18 @@ export default function VideoRoom({ token, url, roomId, role, userName, onLeave 
       }}
     >
       {role === "teacher" && (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 24px", background: "rgba(160,124,254,0.1)", borderBottom: "1px solid rgba(160,124,254,0.2)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 px-6 bg-primary/10 border-b border-primary/20">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
             <button
               onClick={handleToggleListening}
               style={{
                 background: isListening ? "rgba(239, 68, 68, 0.2)" : "rgba(160,124,254,0.2)",
                 color: isListening ? "#f87171" : "#cfbcff",
                 border: `1px solid ${isListening ? "rgba(239, 68, 68, 0.4)" : "rgba(160,124,254,0.4)"}`,
-                borderRadius: "8px", padding: "6px 14px", fontSize: "0.85rem", fontWeight: 700,
-                cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
-                transition: "all 0.2s"
+                borderRadius: "8px", padding: "8px 14px", fontSize: "0.85rem", fontWeight: 700,
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                transition: "all 0.2s",
+                width: "100%",
               }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: "18px", animation: isListening ? "pulse 2s infinite" : "none" }}>
@@ -497,7 +498,7 @@ export default function VideoRoom({ token, url, roomId, role, userName, onLeave 
             </button>
 
             {transcriptionStatus === "error" ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#f87171", fontSize: "0.85rem" }}>
+              <div className="flex flex-wrap items-center gap-2 text-[#f87171] text-[0.85rem]">
                 <span className="material-symbols-outlined" style={{ animation: "pulse 2s infinite" }}>wifi_off</span>
                 Voice transcription offline (Speech API unreachable). 
                 <button 
@@ -511,17 +512,17 @@ export default function VideoRoom({ token, url, roomId, role, userName, onLeave 
                 </button>
               </div>
             ) : transcriptionStatus === "mocking" ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#4ade80", fontSize: "0.85rem" }}>
+              <div className="flex items-center gap-2 text-[#4ade80] text-[0.85rem]">
                 <span className="material-symbols-outlined">check_circle</span>
                 Simulated class lecture data loaded successfully.
               </div>
             ) : isListening ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#cfbcff", fontSize: "0.85rem" }}>
+              <div className="flex items-center gap-2 text-[#cfbcff] text-[0.85rem]">
                 <span className="material-symbols-outlined" style={{ animation: "pulse 2s infinite" }}>radio_button_checked</span>
                 Recording active. Speak into your microphone...
               </div>
             ) : (
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#cbc3d5", fontSize: "0.85rem" }}>
+              <div className="flex items-center gap-2 text-[#cbc3d5] text-[0.85rem]">
                 <span className="material-symbols-outlined">info</span>
                 Click start to begin transcribing your lecture notes.
               </div>
@@ -532,9 +533,10 @@ export default function VideoRoom({ token, url, roomId, role, userName, onLeave 
             disabled={isGenerating}
             style={{
               background: "linear-gradient(90deg, #A07CFE 0%, #FE8495 50%, #FFD270 100%)",
-              color: "#090A0F", border: "none", borderRadius: "8px", padding: "8px 16px",
+              color: "#090A0F", border: "none", borderRadius: "8px", padding: "10px 16px",
               fontSize: "0.875rem", fontWeight: 700, cursor: isGenerating ? "not-allowed" : "pointer",
-              display: "flex", alignItems: "center", gap: "6px", opacity: isGenerating ? 0.7 : 1
+              display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", opacity: isGenerating ? 0.7 : 1,
+              width: "100%",
             }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>auto_awesome</span>

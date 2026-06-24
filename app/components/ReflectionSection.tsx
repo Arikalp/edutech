@@ -57,7 +57,7 @@ export default function ReflectionSection() {
                 { dot: "#F59E0B", label: "Try Next Time", value: "Quick poll after the hook" },
                 { dot: "#A855F7", label: "Class Felt", value: "Curious · Engaged · A little tired" },
               ].map((item) => (
-                <div key={item.label} className="grid grid-cols-[140px_1fr] gap-6 items-start">
+                <div key={item.label} className="flex flex-col gap-1 sm:grid sm:grid-cols-[140px_1fr] sm:gap-6 items-start">
                   <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-white/50 mt-1">
                     <div
                       className="w-2 h-2 rounded-full"

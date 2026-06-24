@@ -38,7 +38,7 @@ export default function DashboardNav() {
               <span className="text-[1.1rem] font-bold text-on-surface tracking-tight">
                 EduAgent
               </span>
-              <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[0.65rem] font-semibold text-primary">
+              <span className="hidden sm:inline-flex rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[0.65rem] font-semibold text-primary">
                 Workspace
               </span>
             </div>
@@ -61,7 +61,7 @@ export default function DashboardNav() {
                   )}
                 >
                   <Icon className="h-4 w-4" strokeWidth={isActive ? 2.5 : 2} />
-                  {link.label}
+                  <span className="hidden sm:inline">{link.label}</span>
                 </Link>
               );
             })}

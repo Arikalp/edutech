@@ -145,15 +145,15 @@ export default function Profile() {
           </div>
 
           {/* Stats */}
-          <div className="flex shrink-0 items-center gap-6 rounded-xl border border-white/5 bg-black/20 p-5 backdrop-blur-sm sm:gap-8">
+          <div className="grid grid-cols-3 gap-2 sm:flex sm:items-center sm:gap-8 sm:shrink-0 rounded-xl border border-white/5 bg-black/20 p-4 sm:p-5 backdrop-blur-sm">
             {profileStats.map((s, i) => (
-              <div key={s.label} className="flex items-center gap-6 sm:gap-8">
+              <div key={s.label} className="flex items-center gap-2 sm:gap-8 justify-center sm:justify-start">
                 <div className="flex flex-col items-center justify-center gap-1">
-                  <span className="text-3xl font-extrabold" style={{ color: s.color }}>{s.value}</span>
-                  <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-on-surface-variant">{s.label}</span>
+                  <span className="text-2xl sm:text-3xl font-extrabold" style={{ color: s.color }}>{s.value}</span>
+                  <span className="text-[0.55rem] sm:text-[0.65rem] font-semibold uppercase tracking-wider text-on-surface-variant text-center">{s.label}</span>
                 </div>
                 {i < profileStats.length - 1 && (
-                  <div className="h-10 w-px bg-white/10" />
+                  <div className="hidden sm:block h-10 w-px bg-white/10" />
                 )}
               </div>
             ))}

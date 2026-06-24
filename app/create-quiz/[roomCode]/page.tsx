@@ -270,7 +270,7 @@ export default function CreateQuizPage() {
     <div style={{ background: "#121318", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <DashboardNav />
 
-      <main style={{ flex: 1, padding: "32px", maxWidth: "800px", margin: "0 auto", width: "100%", display: "flex", flexDirection: "column", gap: "24px" }}>
+      <main className="flex-1 w-full max-w-[800px] mx-auto p-4 sm:p-8 flex flex-col gap-6">
         
         {/* Page Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "20px", flexWrap: "wrap" }}>
@@ -387,7 +387,7 @@ export default function CreateQuizPage() {
                     </div>
 
                     {/* Options */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {q.options.map((opt, optIdx) => (
                         <div key={optIdx} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                           <label style={{ fontSize: "0.68rem", fontWeight: 600, color: "#968e9d" }}>OPTION {String.fromCharCode(65 + optIdx)}</label>
@@ -450,7 +450,7 @@ export default function CreateQuizPage() {
               </button>
 
               {/* Actions */}
-              <div style={{ display: "flex", gap: "16px", width: "100%", marginTop: "12px" }}>
+              <div className="flex flex-col sm:flex-row gap-4 w-full mt-3">
                 <button
                   onClick={() => router.push("/dashboard")}
                   disabled={isGenerating}
@@ -558,7 +558,7 @@ export default function CreateQuizPage() {
                   </div>
 
                   {/* Actions */}
-                  <div style={{ display: "flex", gap: "16px", width: "100%", marginTop: "12px" }}>
+                  <div className="flex flex-col sm:flex-row gap-4 w-full mt-3">
                     <button
                       onClick={() => router.push("/dashboard")}
                       disabled={isGenerating}

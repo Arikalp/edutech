@@ -127,20 +127,11 @@ export default function ReviewQuizModal({
 
       {/* Modal Container */}
       <div
-        className="glass-card"
+        className="glass-card w-full max-w-[750px] p-4 sm:p-7 rounded-2xl relative flex flex-col gap-5 max-h-[90vh]"
         style={{
-          position: "relative",
-          maxWidth: "750px",
-          width: "100%",
-          borderRadius: "16px",
           background: "#121318",
           border: "1px solid rgba(160, 124, 254, 0.25)",
           boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
-          padding: "28px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-          maxHeight: "90vh",
         }}
       >
         {/* Modal Header */}
@@ -261,7 +252,7 @@ export default function ReviewQuizModal({
                 {/* Options Input list */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                   <label style={{ fontSize: "0.68rem", fontWeight: 600, color: "#968e9d" }}>OPTIONS & CORRECT ANSWER</label>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {q.options.map((opt, optIdx) => {
                       const isCorrect = q.correctAnswer === opt && opt.trim() !== "";
                       return (
@@ -364,13 +355,7 @@ export default function ReviewQuizModal({
 
         {/* Modal Actions */}
         <div
-          style={{
-            display: "flex",
-            gap: "14px",
-            borderTop: "1px solid rgba(255, 255, 255, 0.06)",
-            paddingTop: "20px",
-            marginTop: "4px"
-          }}
+          className="flex flex-col sm:flex-row gap-3 w-full border-t border-white/5 pt-5 mt-1"
         >
           <button
             onClick={onClose}

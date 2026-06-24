@@ -426,9 +426,9 @@ export default function StudentDashboard() {
 
   const getColSpan = (id: string) => {
     const span = widgetSizes[id] || DEFAULT_SIZES[id as keyof typeof DEFAULT_SIZES] || 1;
-    if (span === 3) return 'lg:col-span-3';
-    if (span === 2) return 'lg:col-span-2';
-    return 'lg:col-span-1';
+    if (span === 3) return "md:col-span-2 lg:col-span-3";
+    if (span === 2) return "md:col-span-2 lg:col-span-2";
+    return "md:col-span-1 lg:col-span-1";
   };
 
   return (
@@ -521,7 +521,7 @@ export default function StudentDashboard() {
         {/* Draggable Widgets Area */}
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={widgetOrder} strategy={rectSortingStrategy}>
-            <div className={`grid grid-flow-row-dense grid-cols-1 gap-8 lg:grid-cols-3 transition-all ${isCustomizing ? 'p-4 rounded-3xl bg-white/5 border border-white/10 border-dashed' : ''}`}>
+            <div className={`grid grid-flow-row-dense grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 transition-all ${isCustomizing ? 'p-4 rounded-3xl bg-white/5 border border-white/10 border-dashed' : ''}`}>
               {widgetOrder.map(id => (
                 <div key={id} className={getColSpan(id)}>
                   {renderWidget(id)}

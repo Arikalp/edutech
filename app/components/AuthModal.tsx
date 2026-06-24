@@ -173,19 +173,9 @@ export default function AuthModal({ isOpen, onClose, initialTab = "login", initi
 
       {/* Modal Container */}
       <div
-        className="glass-card"
+        className="glass-card w-full max-w-[460px] p-5 sm:p-8 rounded-2xl relative flex flex-col gap-6 max-h-[90vh] overflow-y-auto"
         style={{
-          position: "relative",
-          width: "100%",
-          maxWidth: "460px",
-          borderRadius: "16px",
-          padding: "32px",
           boxShadow: `0 20px 50px rgba(0, 0, 0, 0.4), 0 0 30px -10px ${primaryBorder}`,
-          display: "flex",
-          flexDirection: "column",
-          gap: "24px",
-          maxHeight: "90vh",
-          overflowY: "auto",
         }}
       >
         {/* Close Button */}
