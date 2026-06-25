@@ -209,6 +209,12 @@ body {
   word-wrap: normal;
   direction: ltr;
   -webkit-font-smoothing: antialiased;
+  /* Variable font axes: optical size, fill, grade */
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  /* Prevent raw icon name text from breaking layout if font is slow */
+  overflow: hidden;
+  /* Keep icon size fixed regardless of text content */
+  max-width: 1.5em;
 }
 
 /* ── Responsive Layout Utilities ───────────────────────────────────── */

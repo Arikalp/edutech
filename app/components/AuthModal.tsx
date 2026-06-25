@@ -84,7 +84,9 @@ export default function AuthModal({ isOpen, onClose, initialTab = "login", initi
       } else if (err.message === "auth/wrong-password" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
         setError("Invalid password. Please try again.");
       } else if (err.code === "auth/user-not-found") {
-        setError("No user found with this email.");
+        setError("User not registered, please register.");
+        setTab("signup");
+        setView("role-select");
       } else if (err.code === "auth/email-already-in-use") {
         setError("This email is already registered.");
       } else if (err.code === "auth/weak-password") {
@@ -209,6 +211,28 @@ export default function AuthModal({ isOpen, onClose, initialTab = "login", initi
             close
           </span>
         </button>
+
+        {/* Error Alert */}
+        {error && (
+          <div
+            style={{
+              background: "rgba(239, 68, 68, 0.1)",
+              border: "1px solid rgba(239, 68, 68, 0.25)",
+              color: "#f87171",
+              borderRadius: "8px",
+              padding: "12px 16px",
+              fontSize: "0.825rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
+              error
+            </span>
+            <span>{error}</span>
+          </div>
+        )}
 
         {view === "role-select" && tab === "signup" ? (
           /* ─── ROLE SELECTION VIEW (Sign Up Only) ─────────────────────── */
@@ -483,28 +507,6 @@ export default function AuthModal({ isOpen, onClose, initialTab = "login", initi
                 Sign Up
               </button>
             </div>
-
-            {/* Error Alert */}
-            {error && (
-              <div
-                style={{
-                  background: "rgba(239, 68, 68, 0.1)",
-                  border: "1px solid rgba(239, 68, 68, 0.25)",
-                  color: "#f87171",
-                  borderRadius: "8px",
-                  padding: "12px 16px",
-                  fontSize: "0.825rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
-                  error
-                </span>
-                <span>{error}</span>
-              </div>
-            )}
 
             {/* Form */}
             <form onSubmit={handleEmailAuth} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>

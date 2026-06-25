@@ -42,6 +42,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Flag to suppress the onAuthStateChanged listener during Google login cleanup.
+// When a user clicks "Log In" with Google but has no account, we delete/sign
+// them out. The resulting auth state change should NOT set user=null and
+// trigger dashboard's redirect to "/" — the modal handles the redirect itself.
+let suppressNextAuthStateChange = false;
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -51,11 +57,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!isDemoMode && auth) {
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
         if (firebaseUser) {
+          // RACE CONDITION GUARD: Check this first, before any async Firestore
+          // fetch. When intent="login" is in progress, we set this flag before
+          // signInWithPopup so we can suppress accidental account state changes
+          // immediately without wasting a DB read or risking partial state updates.
+          if (suppressNextAuthStateChange) {
+            suppressNextAuthStateChange = false;
+            setLoading(false);
+            return;
+          }
+
           let role: "teacher" | "student" = "student";
-          let additionalData = {};
+          let additionalData: Record<string, any> = {};
+          let profileData: Record<string, any> | null = null;
+
           if (db) {
             try {
-              const profileData = await getUserProfile(firebaseUser.uid);
+              profileData = await getUserProfile(firebaseUser.uid);
               if (profileData) {
                 if (profileData.role) role = profileData.role;
                 additionalData = profileData;
@@ -64,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               console.error("Failed to fetch user profile from Firestore", e);
             }
           }
+
           const profile = {
             uid: firebaseUser.uid,
             email: firebaseUser.email,
@@ -214,6 +233,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       if (!isDemoMode && auth && googleProvider) {
+        // For login intent, suppress intermediate onAuthStateChanged events.
+        // Firebase fires onAuthStateChanged the moment signInWithPopup resolves —
+        // BEFORE we can inspect isNewUser or check Firestore. If we wait, the
+        // listener fires first and sets user state with the accidental account,
+        // causing the dashboard redirect race. Setting the flag here ensures
+        // the listener is suppressed regardless of timing.
+        if (intent === "login") {
+          suppressNextAuthStateChange = true;
+        }
+
         const result = await signInWithPopup(auth, googleProvider);
         const fbUser = result.user;
         const additionalInfo = getAdditionalUserInfo(result);
@@ -221,8 +250,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Enforce intent
         if (intent === "login" && additionalInfo?.isNewUser) {
           // User clicked "Log In" but they are a brand new user.
-          // Instantly delete the accidentally created Firebase account and throw an error.
-          await deleteUser(fbUser);
+          // Instantly delete the accidentally created Firebase account.
+          try {
+            await deleteUser(fbUser);
+          } catch (deleteError) {
+            console.error("Failed to delete accidental user:", deleteError);
+          }
           await signOut(auth);
           throw { code: "auth/account-not-found", message: "User not registered, please register." };
         }
@@ -237,6 +270,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             additionalData = profileData;
           } else {
             // First time signup or role missing
+            if (intent === "login") {
+              await signOut(auth);
+              throw { code: "auth/account-not-found", message: "User not registered, please register." };
+            }
             await setDoc(doc(db, "users", fbUser.uid), { role: finalRole });
           }
         }
@@ -286,6 +323,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return profile;
       }
     } catch (error: any) {
+      // If the popup was closed before completing, the suppressNextAuthStateChange
+      // flag may still be true. Reset it so it doesn't leak and suppress a future
+      // legitimate login attempt.
+      if (error?.code === "auth/popup-closed-by-user" || error?.code === "auth/cancelled-popup-request") {
+        suppressNextAuthStateChange = false;
+      }
       throw error;
     } finally {
       setLoading(false);
