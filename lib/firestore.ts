@@ -10,6 +10,7 @@ export interface Classroom {
   roomCode: string;
   students: string[];
   createdAt: any;
+  status?: "active" | "inactive";
 }
 
 export interface TranscriptLine {
@@ -106,6 +107,7 @@ export async function createClassroom(name: string, description: string, teacher
     roomCode,
     students: [],
     createdAt: serverTimestamp(),
+    status: "active" as const,
   };
 
   await setDoc(newDocRef, classroomData);
@@ -148,20 +150,23 @@ export async function getTeacherClassrooms(teacherId: string): Promise<Classroom
   const q = query(collection(db, "classrooms"), where("teacherId", "==", teacherId));
   const snapshot = await getDocs(q);
 
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Classroom)).sort((a, b) => {
-    const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
-    const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
-    return timeB - timeA;
-  });
+  return snapshot.docs
+    .map(doc => ({ id: doc.id, ...doc.data() } as Classroom))
+    .filter(c => c.status !== "inactive")
+    .sort((a, b) => {
+      const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+      const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+      return timeB - timeA;
+    });
 }
 
 /**
- * Deletes a classroom from Firestore
+ * Deletes a classroom from Firestore (soft delete by marking as inactive)
  */
 export async function deleteClassroom(classDocId: string): Promise<void> {
   if (!db) throw new Error("Firestore is not initialized.");
   const classDocRef = doc(db, "classrooms", classDocId);
-  await deleteDoc(classDocRef);
+  await updateDoc(classDocRef, { status: "inactive" });
 }
 
 /**

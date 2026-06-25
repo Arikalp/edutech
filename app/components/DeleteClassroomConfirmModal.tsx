@@ -95,7 +95,7 @@ export default function DeleteClassroomConfirmModal({
               lineHeight: "1.5",
             }}
           >
-            Are you sure you want to delete <strong style={{ color: "#ffffff" }}>{classroomName}</strong>? This action is permanent and cannot be undone. All quizzes, results, and history associated with this classroom will be deleted.
+            Are you sure you want to delete <strong style={{ color: "#ffffff" }}>{classroomName}</strong>? This will remove the classroom from your active list, but students will still retain their past quizzes and history.
           </p>
         </div>
 

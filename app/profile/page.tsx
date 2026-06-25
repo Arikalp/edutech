@@ -292,9 +292,14 @@ export default function Profile() {
                 else if (courseAvgScore > 0) courseAverageGrade = "F";
 
                 return (
-                  <div key={course.id} className="group flex flex-col gap-5 rounded-xl border border-white/5 bg-white/5 p-5 transition-all hover:bg-white/10 hover:border-secondary/30">
+                  <div key={course.id} className={`group flex flex-col gap-5 rounded-xl border border-white/5 p-5 transition-all ${course.status === 'inactive' ? 'bg-white/5 opacity-60' : 'bg-white/5 hover:bg-white/10 hover:border-secondary/30'}`}>
                     <div>
-                      <h4 className="text-base font-bold text-white">{course.name}</h4>
+                      <div className="flex justify-between items-start">
+                        <h4 className="text-base font-bold text-white">{course.name}</h4>
+                        {course.status === 'inactive' && (
+                          <span className="text-[0.65rem] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Inactive</span>
+                        )}
+                      </div>
                       <p className="mt-0.5 text-xs text-on-surface-variant">Instructor: {course.teacherName}</p>
                     </div>
                     
@@ -311,10 +316,16 @@ export default function Profile() {
                     <div className="mt-auto flex items-end justify-between pt-2">
                       <div>
                         <span className="text-[0.65rem] font-bold uppercase tracking-wider text-on-surface-variant">Next Up</span>
-                        <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-white">
-                          Pending Assignments
-                          <ChevronRight className="h-3.5 w-3.5 text-on-surface-variant/50 group-hover:text-white transition-colors" />
-                        </p>
+                        {course.status === 'inactive' ? (
+                          <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-on-surface-variant">
+                            N/A
+                          </p>
+                        ) : (
+                          <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-white">
+                            Pending Assignments
+                            <ChevronRight className="h-3.5 w-3.5 text-on-surface-variant/50 group-hover:text-white transition-colors" />
+                          </p>
+                        )}
                       </div>
                       <div className="rounded-lg bg-emerald-400/10 px-3 py-1.5 text-sm font-extrabold text-emerald-400">
                         {courseAverageGrade}
