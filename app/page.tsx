@@ -43,7 +43,9 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  if (user) return null;
+  // Don't block render while Firebase resolves auth state.
+  // The useEffect above handles redirecting logged-in users to dashboard.
+  // Returning null here causes a blank page on hard refresh for ~500-2000ms.
 
   return (
     <main className="bg-background text-on-surface font-sans overflow-x-hidden">
