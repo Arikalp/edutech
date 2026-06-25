@@ -65,7 +65,7 @@ const stats = [
 
 export default function GlobalStatsSection() {
   return (
-    <section className="py-24 border-y border-white/5 bg-[#0d0e13]">
+    <section id="global" className="py-24 border-y border-white/5 bg-[#0d0e13] scroll-mt-24">
       <div className="max-w-[1280px] mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 text-center fade-up">
         {stats.map((s) => (
           <div key={s.label}>

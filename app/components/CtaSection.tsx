@@ -4,7 +4,7 @@ import DisplayCards from "./ui/display-cards";
 
 export default function CtaSection() {
   return (
-    <section className="py-32 px-6 relative z-10 overflow-hidden bg-[#0d0e13] border-t border-white/5">
+    <section id="pricing" className="py-32 px-6 relative z-10 overflow-hidden bg-[#0d0e13] border-t border-white/5 scroll-mt-24">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-primary/5 rounded-full blur-[150px] pointer-events-none" />
 

@@ -67,7 +67,7 @@ export default function TestimonialsMarquee() {
   const doubled = [...testimonials, ...testimonials];
 
   return (
-    <section className="py-16 border-y border-white/10 bg-[#121318]/50 overflow-hidden">
+    <section id="testimonials" className="py-16 border-y border-white/10 bg-[#121318]/50 overflow-hidden scroll-mt-24">
       <div className="animate-marquee-slow gap-8 px-4 flex">
         {doubled.map((t, i) => (
           <TestimonialCard key={i} {...t} />
