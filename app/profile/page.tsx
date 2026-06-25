@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import DashboardNav from "../components/DashboardNav";
 import PageLoader from "../components/PageLoader";
 import SignoutConfirmModal from "../components/SignoutConfirmModal";
+import ClassHistoryModal from "../components/ClassHistoryModal";
 import { LogOut, History, Clock, Users, BookOpen, BrainCircuit, SidebarClose, ChevronRight, Activity, TrendingUp, Edit3 } from "lucide-react";
 import { useAppStore } from "../store/useAppStore";
+import { Classroom } from "../../lib/firestore";
 
 // ── Teacher Types ──
 interface ParticipantPerformance {
@@ -57,6 +59,7 @@ export default function Profile() {
 
   const [selectedMeeting, setSelectedMeeting] = useState<PastMeeting | null>(null);
   const [confirmSignoutOpen, setConfirmSignoutOpen] = useState(false);
+  const [historyClassroom, setHistoryClassroom] = useState<Classroom | null>(null);
 
   useEffect(() => {
     if (pastClassroomSessions.length > 0 && !selectedMeeting) {
@@ -327,8 +330,17 @@ export default function Profile() {
                           </p>
                         )}
                       </div>
-                      <div className="rounded-lg bg-emerald-400/10 px-3 py-1.5 text-sm font-extrabold text-emerald-400">
-                        {courseAverageGrade}
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => setHistoryClassroom(course)} 
+                          className="flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white/10"
+                        >
+                          <History className="h-3 w-3 text-orange-400" />
+                          History
+                        </button>
+                        <div className="rounded-lg bg-emerald-400/10 px-3 py-1.5 text-sm font-extrabold text-emerald-400">
+                          {courseAverageGrade}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -356,6 +368,12 @@ export default function Profile() {
           await logout();
           router.push("/");
         }}
+      />
+
+      <ClassHistoryModal 
+        isOpen={!!historyClassroom} 
+        onClose={() => setHistoryClassroom(null)} 
+        classroom={historyClassroom} 
       />
 
 

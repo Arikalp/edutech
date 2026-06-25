@@ -268,36 +268,24 @@ export default function StudentDashboard() {
                 </div>
               </div>
 
-              {classrooms.length > 0 ? (
+              {classrooms.filter(c => c.status !== 'inactive').length > 0 ? (
                 <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
-                  {classrooms.map(c => (
+                  {classrooms.filter(c => c.status !== 'inactive').map(c => (
                     <div key={c.id} className="group shrink-0 w-[280px] sm:w-[320px] snap-start relative flex flex-col justify-between overflow-hidden rounded-xl border border-white/5 bg-background p-5 transition-all hover:border-sky-400/30 hover:bg-white/5">
                       <div>
                         <div className="flex justify-between items-start">
                           <h3 className="text-base font-semibold text-white">{c.name}</h3>
-                          {c.status === 'inactive' && (
-                            <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded-md">Inactive</span>
-                          )}
                         </div>
                         <p className="mt-1 text-sm text-on-surface-variant">Teacher: <span className="text-white">{c.teacherName}</span></p>
                       </div>
                       <div className="mt-6 flex gap-2.5">
-                        {c.status !== 'inactive' ? (
-                          <button 
-                            onClick={() => router.push(`/classroom/${c.roomCode}`)} 
-                            className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-sky-400/10 py-2.5 text-xs sm:text-sm font-semibold text-sky-400 transition-colors hover:bg-sky-400/20"
-                          >
-                            Enter Live
-                            <ChevronRight className="h-4 w-4" />
-                          </button>
-                        ) : (
-                          <button 
-                            disabled
-                            className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-white/5 py-2.5 text-xs sm:text-sm font-semibold text-on-surface-variant opacity-50 cursor-not-allowed"
-                          >
-                            Inactive
-                          </button>
-                        )}
+                        <button 
+                          onClick={() => router.push(`/classroom/${c.roomCode}`)} 
+                          className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-sky-400/10 py-2.5 text-xs sm:text-sm font-semibold text-sky-400 transition-colors hover:bg-sky-400/20"
+                        >
+                          Enter Live
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
                         <button 
                           onClick={() => setHistoryClassroom(c)} 
                           className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/5 py-2.5 text-xs sm:text-sm font-semibold text-white transition-colors hover:bg-white/10"
