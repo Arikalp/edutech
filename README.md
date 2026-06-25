@@ -1,160 +1,235 @@
-# 🎓 EduAgent AI
+<div align="center">
 
-> **"Your impact is human. Let us handle the data."**
->
-> EduAgent is a next-generation AI co-pilot for teachers. It manages operational noise, reads classroom energy, suggests local analogies, and handles real-time translations—allowing educators to lead classrooms with confidence, connection, and heart.
+<br/>
 
----
+# EduAgent AI
 
-## ✨ Features
+**The AI co-pilot built for live classrooms.**
 
-- 🎙️ **Live Classroom Companion ("Jarvis for Teachers")**
-  - **Class Energy Analytics**: Real-time tracking of student engagement (e.g., alert when energy drops).
-  - **Local Analogy Generator**: Suggests localized analogies on-the-fly (e.g., comparing Mitochondria to a city's power plant).
-  - **Multilingual Support**: Real-time suggestion to switch language context based on student needs (e.g., transition to Hindi).
-  - **Attention Recovery**: Prompts attention-grabbing actions like quick polls or movement breaks.
+EduAgent turns a teacher's spoken lecture into structured learning — transcribing speech in real time, generating quiz questions on the fly, and producing AI-assisted session notes automatically. All while the class is still in session.
 
-- 🎥 **Virtual Classrooms (LiveKit Integration)**
-  - Powered by **LiveKit WebRTC**, offering crystal-clear video & audio.
-  - Multi-party video grid, participant tiles, and active speaker highlighting.
-  - Integrated live classroom chat for real-time questions and feedback.
-  - Admin/Teacher roles equipped with room moderation permissions.
+<br/>
 
-- 📊 **Session History & AI Insights**
-  - Complete list of past meeting archives.
-  - Overall engagement metrics and average classroom scores.
-  - Detailed student-level logs (e.g., "Emily Watson demonstrated full mastery of factoring").
-  - AI-generated summaries and personalized homework/assignment recommendations.
+[![Next.js](https://img.shields.io/badge/Next.js_16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![LiveKit](https://img.shields.io/badge/LiveKit-WebRTC-1B1F2E?style=for-the-badge&logo=webrtc)](https://livekit.io/)
+[![Firebase](https://img.shields.io/badge/Firebase_v12-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 
-- 🔒 **Secure Workspace Portal**
-  - Interactive dashboard to create, join, and manage classroom sessions.
-  - Firebase Authentication supporting email/password registration and Google Sign-in.
-  - Dual Mode fallback: Runs in mock mode if Firebase keys are missing, allowing zero-setup local exploration.
+<br/>
+
+</div>
 
 ---
 
-## 🎨 Theme & Visual Identity
+## The Problem
 
-EduAgent features a premium, state-of-the-art dark design system built with custom glassmorphism and smooth micro-animations.
+Most edtech tools are built *around* the classroom — LMS platforms, homework trackers, gradebooks. They capture what happens before and after a lesson, but the lesson itself stays a black box.
 
-- **Background & Deep Colors**: `#121318` & `#090A0F` (Dark night aesthetic)
-- **Signature Gradient**: Linear sweep of `#A07CFE` (Amethyst) ➔ `#FE8495` (Soft Rose) ➔ `#FFD270` (Amber Gold)
-- **Primary & Secondary Accents**: `#cfbcff` (Soft lavender) & `#ffb2ba` (Soft salmon)
-- **UI Elements**: Glassmorphic cards (`glass-card`) utilizing backdrop blur (`24px`), glowing outlines, hover lift effects, and pulsing states.
+Teachers end up doing double work: teach the class, then manually write notes, create follow-up quizzes, and assess comprehension. The cognitive overhead is real, and it pulls focus away from students.
 
----
-
-## 🛠️ Tech Stack
-
-- **Framework**: [Next.js 16](https://nextjs.org/) (utilizing React 19)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) & Vanilla CSS for animations
-- **Real-Time Video**: [LiveKit React SDK](https://livekit.io/) & `livekit-server-sdk`
-- **Database & Auth**: [Firebase v12](https://firebase.google.com/) (Auth, Firestore)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/) & CSS keyframes
+**EduAgent flips this.** It sits inside the live class, listening, and turns what the teacher is already saying into structured learning material — automatically.
 
 ---
 
-## 📁 Project Structure
+## What It Does
 
-```text
+### 🎙️ Live Transcription
+Audio from the teacher's microphone is transcribed in real time during a LiveKit session. No post-processing, no waiting until the class ends — the transcript builds as the lecture unfolds.
+
+### ⚡ Automatic Quiz Generation
+The live transcript is continuously fed into an AI pipeline that extracts key concepts and generates quiz questions in real time. Students can take the quiz mid-session or at the end of class — directly inside the platform.
+
+### 📝 AI-Generated Session Notes
+At the end of a session, EduAgent compiles the full transcript into clean, structured notes with AI assistance. Teachers get an exportable summary they can share with students or archive for future reference.
+
+### 🎥 Full-Featured Virtual Classroom
+Built on LiveKit's WebRTC infrastructure, the classroom supports multi-party video, active speaker highlighting, and a real-time chat sidebar — the full video conferencing experience with zero third-party dependency.
+
+### 💬 In-Session AI Chatbot
+A floating AI assistant is available throughout the session. Teachers and students can ask questions about the ongoing lecture, clarify concepts, or query past session content.
+
+### 📊 Session History & Analytics
+Every session is archived. Teachers can review past transcripts, revisit AI-generated notes, and access quiz performance breakdowns per student. The dashboard surfaces overall engagement and mastery signals over time.
+
+### 🔒 Authentication & Role Management
+Firebase Auth handles email/password and Google Sign-in. The platform supports distinct Teacher and Student roles with separate dashboard views and permissions.
+
+> **Developer Mock Mode:** Running without Firebase credentials? The app automatically falls back to a localStorage-based mock mode — full UI exploration with zero setup.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (React 19, App Router) |
+| Styling | Tailwind CSS v4 + custom CSS animations |
+| Real-Time Video | LiveKit React SDK + `livekit-server-sdk` |
+| Auth & Database | Firebase v12 (Auth, Firestore) |
+| AI Pipeline | Groq API (transcription, quiz gen, notes) |
+| Animations | Framer Motion + CSS keyframes |
+| Testing | Vitest |
+| State Management | Zustand (`useAppStore`) |
+
+---
+
+## Architecture
+
+```
+┌────────────────────────────────────────────────────────┐
+│                     Browser Client                     │
+│                                                        │
+│  ┌─────────────┐   ┌──────────────┐   ┌─────────────┐  │
+│  │  VideoRoom  │   │  QuizWidget  │   │  ChatBot    │  │
+│  │  (LiveKit)  │   │  (real-time) │   │  (floating) │  │
+│  └──────┬──────┘   └──────┬───────┘   └──────┬──────┘  │
+└─────────│─────────────────│──────────────────│─────────┘
+          │                 │                  │
+          ▼                 ▼                  ▼
+┌─────────────────────────────────────────────────────────┐
+│               Next.js API Routes (Edge)                 │
+│                                                         │
+│  /transcribe  /generate-quiz  /analyze-quiz             │
+│  /generate-notes              /chat  /livekit/token     │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+          ┌────────────┼──────────────┐
+          ▼            ▼              ▼
+    LiveKit SFU     Groq API      Firebase
+    (WebRTC)       (AI tasks)    (Auth + Firestore)
+```
+
+**Why this scales:**
+- LiveKit's SFU architecture means clients publish media once — bandwidth grows at O(1) per client, not O(N²) like peer-to-peer mesh.
+- Next.js API routes deploy as serverless functions, handling traffic spikes elastically with zero idle cost.
+- AI tasks (transcription, quiz gen, note compilation) are decoupled from the render thread — the UI stays responsive regardless of processing time.
+- Firestore handles real-time sync and horizontal scaling at the database layer automatically.
+
+---
+
+## Project Structure
+
+```
 edutech/
 ├── app/
 │   ├── api/
-│   │   └── livekit/token/route.ts  # LiveKit JWT Token generator
-│   ├── classroom/
-│   │   └── [roomId]/page.tsx      # Video room and WebRTC session
-│   ├── components/
-│   │   ├── ui/                    # Shared styling primitives
-│   │   ├── AuthModal.tsx          # Login & Signup handler
-│   │   ├── HeroSection.tsx        # Responsive landing page layout
-│   │   ├── LiveClassroomSection.tsx # Teacher co-pilot feed view
-│   │   ├── VideoRoom.tsx          # Multi-party LiveKit component
-│   │   └── ...                    # Section-specific components
-│   ├── context/
-│   │   └── AuthContext.tsx        # Firebase auth state provider
-│   ├── dashboard/
-│   │   └── page.tsx               # Main teacher control workspace
-│   ├── profile/
-│   │   └── page.tsx               # Session archives & analytics
-│   ├── globals.css                # Tailwind v4 directives & animations
-│   └── page.tsx                   # Landing page
-├── Firebaseconfig.ts              # Firebase Client SDK initializer
-├── next.config.ts                 # Next.js configurations
-├── package.json                   # Project dependencies & scripts
-└── tsconfig.json                  # TypeScript configurations
+│   │   ├── transcribe/          # Real-time audio → text
+│   │   ├── generate-quiz/       # Transcript → quiz questions
+│   │   ├── analyze-quiz/        # Score + evaluate quiz responses
+│   │   ├── generate-notes/      # Transcript → session notes
+│   │   ├── chat/                # In-session AI chatbot
+│   │   └── livekit/token/       # LiveKit JWT token generator
+│   ├── classroom/[roomId]/      # Live video session page
+│   ├── create-quiz/[roomCode]/  # Quiz creation flow
+│   ├── dashboard/               # Teacher & student workspaces
+│   ├── profile/                 # Session archives & analytics
+│   └── components/
+│       ├── VideoRoom.tsx         # Multi-party LiveKit component
+│       ├── TeacherDashboard.tsx  # Teacher control panel
+│       ├── StudentDashboard.tsx  # Student-facing view
+│       ├── FloatingChatbot.tsx   # In-session AI assistant
+│       ├── TakeQuizModal.tsx     # Student quiz interface
+│       ├── QuizReviewModal.tsx   # Post-quiz review
+│       └── ...                  # Auth, modals, onboarding, UI
+├── lib/
+│   ├── firestore.ts             # Firestore helpers
+│   ├── transcript.ts            # Transcript processing utilities
+│   └── utils.ts
+├── __tests__/                   # Vitest test suite
+├── Firebaseconfig.ts
+├── next.config.ts
+└── tsconfig.json
 ```
 
 ---
 
-## 📈 Scalability & Architecture
+## Getting Started
 
-EduAgent is architected to scale from a single classroom to an institution-wide deployment with minimal infrastructure overhead:
+### Prerequisites
+- **Node.js** `v18+` or `v20+`
+- **Firebase project** with Authentication (Email + Google) and Firestore enabled
+- **LiveKit** Cloud account or self-hosted instance
 
-- **Selective Forwarding Unit (SFU) WebRTC (LiveKit)**: Unlike legacy peer-to-peer (Mesh) WebRTC where client bandwidth scales quadratically ($O(N^2)$), EduAgent leverages LiveKit’s Go-based SFU. Clients publish their media once ($O(1)$ upload), and the SFU forwards it, allowing rooms to comfortably scale to hundreds of concurrent video streams.
-- **Serverless & Edge-Ready Next.js Runtime**: The Next.js framework allows API endpoints (such as LiveKit JWT token generation) to be deployed as serverless functions. This ensures the backend handles sudden traffic spikes elastically, scaling down to zero when inactive to save costs.
-- **Serverless Real-Time Data Layer (Firebase Firestore)**: By utilizing a document database designed for massive concurrency, Firestore automatically handles horizontal scaling, sharding, and real-time syncing for millions of concurrent users.
-- **Decoupled AI Processing**: Long-running operations like audio-to-text transcript processing and student analytics compilation are designed to be decoupled from the main thread, keeping the user interface highly responsive.
+### 1. Clone & Install
 
----
+```bash
+git clone https://github.com/your-org/edutech.git
+cd edutech
+npm install
+```
 
-## 🚀 Getting Started
+### 2. Environment Setup
 
-Follow these steps to set up and run EduAgent locally.
-
-### 1. Prerequisites
-- **Node.js**: `v18+` or `v20+` recommended.
-- **Firebase Project**: Set up a Firebase project and enable Authentication (Email & Google) and Cloud Firestore.
-- **LiveKit Cloud or Self-Hosted Instance**: Obtain a LiveKit server URL, API key, and Secret.
-
-### 2. Environment Configuration
-Create a `.env` file in the root directory (or update the existing one) with the following variables:
+Create a `.env.local` file in the project root:
 
 ```env
-# Firebase Client Configurations
-NEXT_PUBLIC_FIREBASE_API_KEY="your_firebase_api_key"
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your_project_id.firebaseapp.com"
+# Firebase
+NEXT_PUBLIC_FIREBASE_API_KEY="your_api_key"
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your_project.firebaseapp.com"
 NEXT_PUBLIC_FIREBASE_PROJECT_ID="your_project_id"
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your_project_id.firebasestorage.app"
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your_project.firebasestorage.app"
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your_sender_id"
 NEXT_PUBLIC_FIREBASE_APP_ID="your_app_id"
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID="your_measurement_id"
 
-# LiveKit Server & Client Configurations
-LIVEKIT_URL="wss://your-livekit-project.livekit.cloud"
+# LiveKit
+LIVEKIT_URL="wss://your-project.livekit.cloud"
 LIVEKIT_API_KEY="your_livekit_api_key"
 LIVEKIT_API_SECRET="your_livekit_api_secret"
-NEXT_PUBLIC_LIVEKIT_URL="wss://your-livekit-project.livekit.cloud"
+NEXT_PUBLIC_LIVEKIT_URL="wss://your-project.livekit.cloud"
 ```
 
-> [!NOTE]
-> **Developer Mock Mode:** If Firebase configurations are omitted from the `.env` file, the application automatically enters **Developer Mode**, mimicking database operations and authentications in `localStorage`. This allows developers to explore the UI immediately.
+> Omit Firebase keys to run in **Developer Mock Mode** — all auth and data operations are simulated in `localStorage`.
 
-### 3. Installation
-Install the project dependencies using `npm`:
-
-```bash
-npm install
-```
-
-### 4. Running the Development Server
-Start the Next.js development server:
+### 3. Run
 
 ```bash
 npm run dev
 ```
 
-The application will be running on [http://localhost:8000](http://localhost:8000).
+Open [http://localhost:3000](http://localhost:3000).
 
-### 5. Building for Production
-To build an optimized bundle for production:
+### 4. Run Tests
 
 ```bash
-npm run build
-npm run start
+npx vitest
 ```
 
 ---
 
-## 📝 License
+## Roadmap
 
-This project is private and proprietary. All rights reserved.
+These features are designed and scoped — implementation is the next step.
+
+- **Class Energy Analytics** — Real-time engagement scoring based on participation signals, with automatic alerts when attention drops.
+- **Attention Recovery Prompts** — Context-aware suggestions for polls, movement breaks, or discussion prompts when the session loses momentum.
+- **Multilingual Support** — Live language-switch suggestions based on detected student comprehension signals.
+- **Local Analogy Engine** — On-the-fly generation of region-specific, culturally relevant analogies to reinforce difficult concepts.
+- **Student Progress Tracking** — Cross-session mastery graphs, topic-level heatmaps, and personalized homework recommendations.
+
+---
+
+## Design System
+
+EduAgent uses a custom dark design system with glassmorphic UI components and smooth micro-animations.
+
+| Token | Value |
+|---|---|
+| Background | `#121318` / `#090A0F` |
+| Signature Gradient | `#A07CFE` → `#FE8495` → `#FFD270` |
+| Primary Accent | `#cfbcff` (soft lavender) |
+| Secondary Accent | `#ffb2ba` (soft salmon) |
+| Glass Effect | `backdrop-blur: 24px` + glowing outline |
+
+---
+
+## License
+
+Private and proprietary. All rights reserved.
+
+---
+
+<div align="center">
+  Built for <strong>OSC EdTech 3.0 Hackathon</strong>
+</div>
