@@ -278,37 +278,51 @@ export default function Profile() {
             </div>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {studentClassrooms.length > 0 ? studentClassrooms.map(course => (
-                <div key={course.id} className="group flex flex-col gap-5 rounded-xl border border-white/5 bg-white/5 p-5 transition-all hover:bg-white/10 hover:border-secondary/30">
-                  <div>
-                    <h4 className="text-base font-bold text-white">{course.name}</h4>
-                    <p className="mt-0.5 text-xs text-on-surface-variant">Instructor: {course.teacherName}</p>
-                  </div>
-                  
-                  <div>
-                    <div className="mb-2 flex justify-between text-xs text-on-surface-variant">
-                      <span className="font-semibold">Avg Score</span>
-                      <span className="font-bold">{avgScore}%</span>
-                    </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/40">
-                      <div className="h-full rounded-full bg-secondary" style={{ width: `${avgScore}%` }} />
-                    </div>
-                  </div>
+              {studentClassrooms.length > 0 ? studentClassrooms.map(course => {
+                const courseQuizzes = pastQuizzes.filter(q => q.roomId === course.id);
+                const courseAvgScore = courseQuizzes.length > 0
+                  ? Math.round(courseQuizzes.reduce((sum, q) => sum + q.score, 0) / courseQuizzes.length)
+                  : 0;
+                
+                let courseAverageGrade = "N/A";
+                if (courseAvgScore >= 90) courseAverageGrade = "A";
+                else if (courseAvgScore >= 80) courseAverageGrade = "B";
+                else if (courseAvgScore >= 70) courseAverageGrade = "C";
+                else if (courseAvgScore >= 60) courseAverageGrade = "D";
+                else if (courseAvgScore > 0) courseAverageGrade = "F";
 
-                  <div className="mt-auto flex items-end justify-between pt-2">
+                return (
+                  <div key={course.id} className="group flex flex-col gap-5 rounded-xl border border-white/5 bg-white/5 p-5 transition-all hover:bg-white/10 hover:border-secondary/30">
                     <div>
-                      <span className="text-[0.65rem] font-bold uppercase tracking-wider text-on-surface-variant">Next Up</span>
-                      <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-white">
-                        Pending Assignments
-                        <ChevronRight className="h-3.5 w-3.5 text-on-surface-variant/50 group-hover:text-white transition-colors" />
-                      </p>
+                      <h4 className="text-base font-bold text-white">{course.name}</h4>
+                      <p className="mt-0.5 text-xs text-on-surface-variant">Instructor: {course.teacherName}</p>
                     </div>
-                    <div className="rounded-lg bg-emerald-400/10 px-3 py-1.5 text-sm font-extrabold text-emerald-400">
-                      {averageGrade}
+                    
+                    <div>
+                      <div className="mb-2 flex justify-between text-xs text-on-surface-variant">
+                        <span className="font-semibold">Avg Score</span>
+                        <span className="font-bold">{courseAvgScore}%</span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/40">
+                        <div className="h-full rounded-full bg-secondary" style={{ width: `${courseAvgScore}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="mt-auto flex items-end justify-between pt-2">
+                      <div>
+                        <span className="text-[0.65rem] font-bold uppercase tracking-wider text-on-surface-variant">Next Up</span>
+                        <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-white">
+                          Pending Assignments
+                          <ChevronRight className="h-3.5 w-3.5 text-on-surface-variant/50 group-hover:text-white transition-colors" />
+                        </p>
+                      </div>
+                      <div className="rounded-lg bg-emerald-400/10 px-3 py-1.5 text-sm font-extrabold text-emerald-400">
+                        {courseAverageGrade}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )) : (
+                );
+              }) : (
                 <div className="col-span-full flex h-32 items-center justify-center rounded-xl border border-dashed border-white/10 text-sm text-on-surface-variant">
                   You haven't enrolled in any classrooms yet. Use a code from your teacher to join on the Dashboard!
                 </div>

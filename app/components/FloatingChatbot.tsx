@@ -12,12 +12,35 @@ export default function FloatingChatbot() {
     { role: "ai", text: "Hi! I'm EduAgent AI, your personal study assistant. What are we learning today?" },
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isOpen, isTyping]);
+
+  useEffect(() => {
+    const handleToggle = () => setIsOpen((prev) => !prev);
+    window.addEventListener("toggle-chatbot", handleToggle);
+    return () => window.removeEventListener("toggle-chatbot", handleToggle);
+  }, []);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.closest(".ai-toggle-btn")) {
+        return; // Ignore clicks on the external toggle button
+      }
+
+      if (isOpen && containerRef.current && !containerRef.current.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [isOpen]);
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,15 +111,15 @@ export default function FloatingChatbot() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
+    <div ref={containerRef} className="fixed bottom-24 sm:bottom-6 right-6 z-[9999] flex flex-col items-end">
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+           <motion.div
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            style={{ display: "flex", flexDirection: "column", height: "500px", width: "360px" }}
+            style={{ display: "flex", flexDirection: "column", height: "500px", width: "100%", maxWidth: "360px" }}
             className="mb-4 rounded-3xl border border-white/10 bg-black/40 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-2xl overflow-hidden"
           >
             {/* Messages Area — grows to fill space */}
@@ -190,18 +213,18 @@ export default function FloatingChatbot() {
         )}
       </AnimatePresence>
 
-      {/* Toggle button */}
+      {/* Toggle button - hidden on mobile since they use the bottom navigation */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
+        className="hidden sm:flex"
         style={{
           width: 64,
           height: 64,
           borderRadius: "50%",
           background: isOpen ? "rgba(0,0,0,0.4)" : "linear-gradient(135deg, #7c3aed, #4ade80)",
           border: isOpen ? "1px solid rgba(255,255,255,0.1)" : "none",
-          display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",

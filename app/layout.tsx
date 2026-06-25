@@ -17,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full scroll-smooth antialiased dark" suppressHydrationWarning>
       <head>
+        <meta name="google" content="notranslate" />
         <meta name="theme-color" content="#090A0F" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
