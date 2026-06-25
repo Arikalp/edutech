@@ -47,8 +47,8 @@ export default function Profile() {
     participantsCount: c.students ? c.students.length : 0,
     aiSummary: `Classroom dynamic summary for ${c.name}. Engagement is steady. Students are actively tracking their progress through upcoming assessments.`,
     participants: studentAnalytics.slice(0, 5).map(s => ({
-      name: s.studentName || "Student",
-      avatarSeed: s.studentName || "S",
+      name: s.name || "Student",
+      avatarSeed: s.name || "S",
       engagement: s.engagement || "0%",
       performance: s.progress ? `${s.progress}%` : "0%",
       insight: s.lastAction || "No recent activity"
