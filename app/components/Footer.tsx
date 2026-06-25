@@ -3,8 +3,14 @@
 import Link from "next/link";
 import { toast } from "react-toastify";
 
+type FooterLink = {
+  label: string;
+  href?: string;
+  action?: () => void;
+};
+
 export default function Footer() {
-  const footerLinks = {
+  const footerLinks: Record<string, FooterLink[]> = {
     Product: [
       { label: "Vision", action: () => toast.info("Vision page coming soon!") },
       { label: "Features", action: () => toast.info("Features page coming soon!") },
