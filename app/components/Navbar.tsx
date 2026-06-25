@@ -36,7 +36,7 @@ export default function Navbar() {
   return (
     <>
       <div className="fixed top-4 left-0 w-full z-50 flex justify-center px-4 pointer-events-none">
-        <nav className={`w-full max-w-[1280px] backdrop-blur-xl border border-white/10 bg-[#121318]/80 shadow-[0_8px_32px_rgba(0,0,0,0.5)] pointer-events-auto transition-all duration-300 ${menuOpen ? "rounded-3xl" : "rounded-full"}`}>
+        <nav className="w-full max-w-[1280px] backdrop-blur-xl border border-white/10 bg-[#121318]/80 shadow-[0_8px_32px_rgba(0,0,0,0.5)] pointer-events-auto transition-all duration-300 rounded-2xl">
           <div className="flex justify-between items-center h-16 px-6">
             {/* Logo */}
             <Link 
